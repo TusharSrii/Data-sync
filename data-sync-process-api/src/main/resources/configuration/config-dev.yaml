@@ -1,0 +1,77 @@
+sap: 
+  host: "apisero-sapmock-sys-api.us-e2.cloudhub.io"
+  port: "80"
+  basepath: "api"
+
+sf: 
+  host: "apisero-netsuitemock-system-api.us-e2.cloudhub.io"
+  port: "80"
+  basepath: "api"
+  
+smtp :
+  host : "![tHoU5ACHJPsMxLyiOPm9ZA==]"
+  port : "![JmWnnPKfjkg=]"
+  password : "![s7JVkcetkPhyu9UJq5UUSmIDtIKNVTls]"
+  user : "![jCPJtqMcuUnhwO4F/G4TBarqhC8xPxIj]" 
+  
+auth :
+  username : "![zZGTfv6OJvM=]"
+  password : "![na1KDCvqJBvCG/PxiJ3VEw==]"
+ 
+mail : 
+  from : "harsha.j.j@apisero.com"
+  to :  "harsha.j.j@apisero.com"
+    
+    
+errorCodeMessage:
+  ### APIKIT Errors ###
+  apikit:
+    badRequest:
+      code: "400"
+      #description: "Request validation error"
+      description: "Bad Request"
+    notFound:
+      code: "404"
+      #description: "Resource not found"
+      description: "Resource Not Found"
+    methodNotAllowed:
+      code: "405"
+      #description: "HTTP method not allowed"
+      description: "Method Not Allowed"
+    notAcceptable:
+      code: "406"
+      #description: "Requested content type not available"
+      description: "Not Acceptable"
+    unsupportedMediaType:
+      code: "415"
+      #description: "Payload format is in an unsupported format"
+      description: "Unsupported Media Type"
+    notImplemented:
+      code: "501"
+      #description: "Requested functionality is not supported"
+      description: "Not Implemented"
+      
+  ### HTTP Errors ###
+  http:
+    connectivity:
+      code: "500"
+      #description: "Connectivity Error, Please try later"
+      description: "Internal Server Error"
+    forbidden:
+      code: "403"
+      #description: "Server refused to authorize the request"
+      description: "Forbidden" 
+    serviceUnavailable:
+      code: "503"
+      #description: "Server not ready to handle the request"
+      description: "Service Unavailable"
+    timeout:
+      code: "504"
+      #description: "Gateway Timeout - Server did not get a response in time"
+      description: "Gateway Timeout" 
+    unauthorized:
+      code: "401"
+      #description: "Invalid Credentials"
+      description: "Unauthorized"
+        
+    

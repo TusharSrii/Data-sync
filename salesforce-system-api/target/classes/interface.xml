@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <flow name="apisero-netsuitemock-sys-api-main" doc:id="cbd9f8f7-952a-4287-855d-c48765d6bd8b">
+        <http:listener config-ref="apisero-netsuitemock-sys-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[vars.errorDescription default payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="apisero-netsuitemock-sys-api-config" />
+		<error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="apisero-netsuitemock-sys-api-console">
+        <http:listener config-ref="apisero-netsuitemock-sys-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="apisero-netsuitemock-sys-api-config" />
+		<error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="put:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="putReportSummaryFlow" doc:id="bfce071c-a148-4e8e-a941-d0eb7e7785dc" name="putReportSummaryFlow"/>
+    </flow>
+    <flow name="put:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="putReportDetailsFlow" doc:id="10942971-0799-4d41-b112-8c3c803be4ae" name="putReportDetailsFlow"/>
+    </flow>
+    <flow name="delete:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="deleteReportDetailsFlow" doc:id="7f29d57a-032f-4df0-9705-afc149f81236" name="deleteReportDetailsFlow"/>
+    </flow>
+    <flow name="delete:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="deleteReportSummaryFlow" doc:id="43c66691-c1d9-46a3-8fdc-0f254cf5f2f9" name="deleteReportSummaryFlow"/>
+    </flow>
+    <flow name="patch:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="patchReportSummaryFlow" doc:id="0502e005-f5eb-464e-b9d1-fce87db2209c" name="patchReportSummaryFlow"/>
+    </flow>
+    <flow name="patch:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="patchtReportDeatilsFlow" doc:id="d7c9bc18-b37f-45e5-9f62-39c4a7fee42b" name="patchtReportDeatilsFlow"/>
+    </flow>
+    <flow name="get:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="getReportDetailsByIdFlow" doc:id="2a0bc4ca-e29f-4e61-8beb-041768680da3" name="getReportDetailsByIdFlow"/>
+    </flow>
+    <flow name="get:\expense\claims\summary:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="getReportSummaryflow" doc:id="c29f8e78-d403-4de2-989b-e6f11d7ac0b6" name="getReportSummaryflow"/>
+    </flow>
+    <flow name="get:\expense\claims\details:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="getReportDetailsFlow" doc:id="a031f8b2-4323-46da-86c7-b7bef7e34f8a" name="getReportDetailsFlow"/>
+    </flow>
+    <flow name="get:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="getReportSummaryByIdFlow" doc:id="147e42c8-4e86-469a-97e9-0b9638ed1d27" name="getReportSummaryByIdFlow"/>
+    </flow>
+    <flow name="post:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="postReportSummaryFlow" doc:id="08d64a74-6a3f-49e0-917b-7ad42e1ae014" name="postReportSummaryFlow"/>
+    </flow>
+    <flow name="post:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config">
+		<flow-ref doc:name="postReportDetailsFlow" doc:id="add89d30-7052-4974-90a9-ed47f4e2947b" name="postReportDetailsFlow"/>
+    </flow>
+</mule>

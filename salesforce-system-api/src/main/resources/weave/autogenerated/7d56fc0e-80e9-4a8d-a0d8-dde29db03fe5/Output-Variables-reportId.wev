@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_7d56fc0e_80e9_4a8d_a0d8_dde29db03fe5_Output_Variables_reportId = Any
+

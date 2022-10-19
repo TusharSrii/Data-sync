@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<flow name="getReportSummaryflow" doc:id="5295f707-2fff-4cb4-ab6d-9c27412dcb18" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="dd67214c-be66-4119-854b-84d644844cbb" message=" Request recieved for getReportSummaryFlow "/>
+		<set-variable value="#[lower(message.attributes.queryParams.approvalStatus)]" doc:name="approvalStatus" doc:id="b51b5f9a-80a5-4812-ab70-889bcd44c23f" variableName="approvalStatus"/>
+		<set-variable value="#[message.attributes.queryParams.reportDate]" doc:name="reportDate" doc:id="8f0c29b0-038e-4012-8972-90eef4b482b3" variableName="reportDate"/>
+		<salesforce:query doc:name="Query expense summary" doc:id="bab55370-b015-49d1-8145-5c20461dce95" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[Select ApprovalStatus__c,ApproverLoginID__c,EmployeeName__c,ExpenseUserLoginID__c,External_ID__c,LastComment__c,Memo__c,PaymentStatus__c,RecordType__c,ReportCurrency__c,ReportDate__c,ReportTotal__c from Expense_summary__c]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="JAVA to JSON" doc:id="0d1894bf-e80e-45cf-b588-878418539b1b" >
+			<ee:message >
+				<ee:set-payload resource="dwl/get-report-summary-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="DW based on Query Parameter" doc:id="08f1d430-2725-4408-aeca-3184c262a1b1" >
+			<ee:message >
+				<ee:set-payload resource="dwl/get-report-summary-queryParams.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="6b10795d-780a-46f8-93e4-4540befd2057" message="Request recieved for getReportSummaryflow"/>
+
+	</flow>
+	<flow name="getReportDetailsByIdFlow" doc:id="c5a422e7-3ecf-4ce9-aa62-c8a73310c79d" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="6004f85d-5789-44ec-b713-8dea5abcbf0d" message=" Request recieved for getReportDetailsFlow "/>
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="2e8800fe-232c-4c2a-94f1-481b69b11c46" variableName="correlationId"/>
+		<salesforce:query doc:name="Query expense details based on ID" doc:id="00fb0e79-55f4-42c7-85e6-7a0240b330df" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[Select Account__c,Approval__c,Billable__c,Class__c,Currency__c,Customer__c,Date__c,Department__c,EmployeeId__c,EmployeeName__c,ExchangeRate__c,External_ID__c,Location__c,Memo__c,NonReimbursable__c,
+PaymentStatus__c,Purpose__c,RecordType__c,reportEntryId__c,SpendCategory__c,TransactionAmount__c,Subsidiary__c,TransactionCurrencyName__c,TransactionDate__c from Expense_detail__c where External_ID__c = ':externalId']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{
+	'externalId' : attributes.uriParams.Id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="If record exists" doc:id="8a552a47-ec04-4856-ab4c-72da196cdecd" >
+			<when expression="#[isEmpty(payload)==false]">
+				<ee:transform doc:name="JAVA to JSON" doc:id="65c663e8-6d74-4021-83b7-5c5221df4972">
+			<ee:message>
+				<ee:set-payload resource="dwl/get-report-summary-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="fc1b55b7-335c-4f18-9caf-6030ff001b36" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="01bd08a0-12ef-49f0-a323-acb2e952819f" message=" Request ended for getReportDetailsFlow "/>
+
+	
+</flow>
+	<flow name="putReportSummaryFlow" doc:id="68f92e47-62fc-4f33-9acf-94696f3f1190" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="57b5ec1e-aab6-4817-b565-26e2f1bac2f7" message=" Request recieved for putReportSummaryFlow "/>
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="32814f51-b256-4b7b-866a-8a0feb852caf" variableName="correlationId"/>
+		<set-variable value="#[message.payload.reportSummary[0].reportId]" doc:name="reportID" doc:id="20eb0e08-187c-4938-adcb-5069fe4ba99d" variableName="reportId" />
+		<salesforce:query doc:name="Query expense summary based on ID" doc:id="8dd8efb4-4125-481b-a490-5c3ab7c1c428" config-ref="Salesforce_Config" target="fetchedId">
+						<salesforce:salesforce-query><![CDATA[select Id from Expense_summary__c where External_ID__c= ':id'
+]]></salesforce:salesforce-query>
+						<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"id" : vars.reportId
+}]]]></salesforce:parameters>
+					</salesforce:query>
+		<choice doc:name="if exists" doc:id="fceae29b-824c-4c8e-9afa-a9f5cecf9b15" >
+			<when expression="#[isEmpty(vars.fetchedId[0].Id)==false]">
+				<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="9fb18880-66e2-4ae4-91bf-f58c80e4f56a">
+			<ee:message>
+				<ee:set-payload resource="dwl/put-report-summary.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:update doc:name="Update expense summary" doc:id="ded8f48a-1153-43dc-87d5-e8c66a34737c" config-ref="Salesforce_Config" type="Expense_summary__c" />
+				<ee:transform doc:name="Success Message" doc:id="cae106b2-21f1-4eaf-81db-f42b23c0a177">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	reportId: vars.reportId,
+	correlationId: vars.correlationId,
+	"message": "Record Updated Successfully"
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<raise-error doc:name="NOT_FOUND" doc:id="971ddbc6-55ad-4c34-a464-f331df8c821c" type="RECORD:NOT_FOUND" description="Record Does Not Exists"/>
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="391c88b0-a6bf-4a9b-aa61-ab321debd4f0" message=" Response sent for putReportSummaryFlow " />
+
+	</flow>
+	<flow name="putReportDetailsFlow" doc:id="772175de-9ea8-4f2a-8cbb-6a65120ab563" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="437d6705-24a5-4f49-8e15-846f569c087f" message=" Request recieved for putReportDetailsFlow "/>
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="b6bfa3ed-2bea-4b5e-880f-d895329898d4" variableName="correlationId"/>
+		<set-variable value="#[message.payload.reportDetails[0].reportId]" doc:name="reportID" doc:id="cf93ad70-bf41-44dd-8391-153f2eaeac40" variableName="reportId"/>
+		<salesforce:query doc:name="Query expense details based on ID" doc:id="758851a0-5616-421f-84da-99061f4fe276" config-ref="Salesforce_Config" target="fetchedData">
+			<salesforce:salesforce-query ><![CDATA[select Id from Expense_detail__c where External_ID__c= ':id'
+]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	id : vars.reportId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="Choice" doc:id="c290cacd-1b64-43c2-b44b-28b19fef0f1a" >
+			<when expression="#[isEmpty(vars.fetchedData[0].Id)==false]">
+				<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="620d2f82-206d-4cb8-81d9-2bea96f9dacb">
+			<ee:message>
+				<ee:set-payload resource="dwl/put-report-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:update type="Expense_detail__c" doc:name="Update expense details based on ID" doc:id="df663d84-a467-490d-b1d0-fd00d7dcef72" config-ref="Salesforce_Config" />
+				<ee:transform doc:name="Success Response" doc:id="fc089955-affa-4ee0-8ffa-912cb59f56a8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	reportId: vars.reportId,
+	correlationId: vars.correlationId,
+	"message": "Record Updated Successfully"
+}
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<raise-error doc:name="NOT_FOUND" doc:id="8ba22699-e28f-4ebb-bacb-8a5ac7bb6a34" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="aedd3d01-9d90-4753-bb1e-a10b98098e79" message="Response sent for putReportDetailsFlow"/>
+
+	
+</flow>
+	<flow name="postReportSummaryFlow" doc:id="7d56fc0e-80e9-4a8d-a0d8-dde29db03fe5" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="5823d927-f545-424f-bcbb-b0cbca0e37cf" message=" Request recieved for postReportSummaryFlow "/>
+		<set-variable value="#[attributes.headers.correlationId]" doc:name="correlationID" doc:id="54d23e69-b724-499c-92b0-d7c40f5e1b18" variableName="correlationId"/>
+		<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="739b04a6-f8d9-4f53-a819-04fc075d96fd">
+			<ee:message>
+				<ee:set-payload resource="dwl/post-report-summary.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.External_ID__c]" doc:name="payload" doc:id="64d02b61-aeec-4a18-9e6d-8c7fda96d1e7" variableName="payloadd"/>
+		<salesforce:create doc:name="Create expense summary" doc:id="644137b2-ff43-4afd-ad80-ff57c8e1cbf7" config-ref="Salesforce_Config" type="Expense_summary__c" />
+		<ee:transform doc:name="Success Response" doc:id="3da889dd-1d54-49d7-a281-e5b22416c4b1">
+			<ee:message>
+				<ee:set-payload resource="dwl/post-report-summary-details-success-response.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="6e269c82-42b9-47c3-b30b-442362f56260" message="Response sent for postReportSummaryFlow"/>
+
+	</flow>
+	<flow name="postReportDetailsFlow" doc:id="5c358c16-05fd-48ca-b4db-95dac7bc88aa" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="81f58d79-6792-479d-a332-ac51fd7d37be" message=" Request recieved for postReportDetailsFlow "/>
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="d22bd398-34cb-477f-9259-e09165efb1e4" variableName="correlationId"/>
+		<set-variable value="#[message.payload.reportDetails[0].reportId]" doc:name="reportID" doc:id="c55546a2-d16f-419a-a8ae-4ecaccd675b8" variableName="reportId"/>
+		<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="33cde0e1-56a7-4a6c-8f9c-ddb65e164282">
+			<ee:message>
+				<ee:set-payload resource="dwl/post-report-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.External_ID__c]" doc:name="payload" doc:id="a868f688-aaa9-4cd3-9ae5-5b58f23b35eb" variableName="payloadd"/>
+		<salesforce:create doc:name="Create expense details " doc:id="84977026-57ed-4e16-a0c0-ebca4cd94e5c" config-ref="Salesforce_Config" type="Expense_detail__c" />
+		<ee:transform doc:name="Success Response" doc:id="c28c142f-7ed9-4182-9ee7-4afe021afaf7">
+			<ee:message>
+				<ee:set-payload resource="dwl/post-report-summary-details-success-response.dwl" ></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="152d7c72-fc51-4d60-9043-1ef410596cf5" message="Response sent for postReportDetailsFlow" />
+
+	
+</flow>
+	<flow name="deleteReportSummaryFlow" doc:id="69a89dd2-4a40-45d3-ab29-0ee77d121820" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="29257e59-327d-4b5a-bc30-b26be957d371" message=" Request recieved for deleteReportSummaryFlow " />
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="c68b312a-f54e-4656-8b6c-b4558d47d653" variableName="correlationId" />
+		<set-variable value="#[message.attributes.uriParams.Id]" doc:name="reportID" doc:id="06ccdc1a-ebb6-4dc4-9a3b-7f738a9e9992" variableName="reportID"/>
+		<salesforce:query doc:name="Query expense summary based on ID" doc:id="5bd19146-39b1-4939-8c13-06f16b008df6" config-ref="Salesforce_Config" target="fetchedId">
+			<salesforce:salesforce-query><![CDATA[Select Id from Expense_summary__c where External_ID__c=':id']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	id : vars.reportID
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="DW Fetching ID" doc:id="2a04b354-7066-4ed3-9dad-e8289b570eae">
+			<ee:message>
+				<ee:set-payload resource="dwl/delete-fetchedId.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="if record exists" doc:id="91777f7b-27d5-4eef-85f7-65ab02219a40">
+			<when expression='#[isEmpty(vars.fetchedId)==false]'>
+				<salesforce:delete doc:name="Delete expense summary based on ID" doc:id="03d07338-5021-4e0f-8bf7-8f7d3d5f0662" config-ref="Salesforce_Config">
+			<salesforce:ids><![CDATA[#[[payload.Id]]]]></salesforce:ids>
+		</salesforce:delete>
+				<ee:transform doc:name="Success Response" doc:id="fa66da2d-209b-4f48-8050-4d0ee8148db1">
+			<ee:message>
+				<ee:set-payload resource="dwl/delete-success-response.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="22366566-5e7b-402f-9265-1d9145769c4e" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="123abea4-2aae-4f77-890e-0b77d3df2df1" message=" Response sent for deleteReportSummaryFlow "/>
+
+	
+</flow>
+	<flow name="deleteReportDetailsFlow" doc:id="97e6d4ef-7d89-4cff-8d16-251556e900b6" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="9ed090b0-2ea7-4d85-8d65-8817c39de746" message=" Request recieved for deleteReportDetailsFlow "/>
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="e6447cac-a4e5-4860-9b1d-c4376ac90ed8" variableName="correlationId"/>
+		<set-variable value="#[message.attributes.uriParams.Id]" doc:name="reportID" doc:id="a6f12fa9-bbc2-45ae-88a5-8262beb5b30c" variableName="reportId"/>
+		<salesforce:query doc:name="Query expense details based on ID" doc:id="a13c550f-73c5-4e7a-8ef5-9729ffb47750" config-ref="Salesforce_Config" target="fetchedId">
+			<salesforce:salesforce-query ><![CDATA[select Id from Expense_detail__c where External_ID__c=':id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{
+	id : vars.reportId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="DW Fetching ID" doc:id="1829f393-41fa-497a-9475-9b0d50308e7a" >
+			<ee:message >
+				<ee:set-payload resource="dwl/delete-fetchedId.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="If record exists" doc:id="10e5aff6-2799-42fb-8955-66bc756f18e9" >
+			<when expression="#[isEmpty(vars.fetchedId)==false]">
+				<salesforce:delete doc:name="Delete expense details based on ID" doc:id="d815e6b8-ea29-4d82-961f-0da8d906dd49" config-ref="Salesforce_Config">
+			<salesforce:ids><![CDATA[#[[payload.Id]]]]></salesforce:ids>
+		</salesforce:delete>
+				<ee:transform doc:name="Success Response" doc:id="4db92326-0051-4cd3-a91e-d3c888d2dfec">
+			<ee:message>
+				<ee:set-payload resource="dwl/delete-success-response.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="d9788928-a5e5-4cd3-b90a-469d6bc41cda" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="c9de061b-d44a-4a42-b881-70c4ce9ec393" message=" Response sent for deleteReportDetailsFlow " />
+
+	
+</flow>
+	<flow name="patchReportSummaryFlow" doc:id="cdd719d2-076f-4bea-8edb-13d4f2a6b7a4" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="a7a92d3e-fb04-4d75-8a9e-fb993f9ad3d0" message=" Request recieved for patchReportSummaryFlow "/>
+		<set-variable value="#[payload.reportSummary[0].reportId]" doc:name="reportID" doc:id="003a0940-9f31-477d-8010-0e996bfb1694" variableName="reportId" />
+		<salesforce:query doc:name="Query expense summary based on ID" doc:id="2c0146b7-2d6b-4616-8313-8bae086bc55f" config-ref="Salesforce_Config" target="fetchedId">
+						<salesforce:salesforce-query><![CDATA[select Id from Expense_summary__c where External_ID__c= ':id'
+]]></salesforce:salesforce-query>
+						<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"id" : vars.reportId
+}]]]></salesforce:parameters>
+					</salesforce:query>
+		<choice doc:name="If record exists or not" doc:id="be7235e6-3ddb-4d25-9438-bda0cd939780">
+						<when expression="#[isEmpty(vars.fetchedId[0].Id)==false]">
+							<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="6b0e8e48-e773-4935-bfeb-246dc44e0b2c">
+						<ee:message>
+							<ee:set-payload resource="dwl/patch-report-summary.dwl"></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+							<salesforce:update type="Expense_summary__c" doc:name="Update expense summary" doc:id="943c5637-00f8-46f9-9829-753ad6039270" config-ref="Salesforce_Config" />
+							<ee:transform doc:name="Success Message" doc:id="7d3e7feb-44f0-44c1-a40c-e3861cdc17d6">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	reportId: vars.reportId,
+	correlationId: vars.correlationId,
+	"message": "Record Updated!!"
+}
+]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<logger level="INFO" doc:name="Success Message" doc:id="7102072e-76f1-4bd1-8c81-4da27b2ba13e" message='#[%dw 2.0
+&#10;output application/json skipNullOn="everywhere"
+&#10;---
+&#10;{
+&#10;	reportId: vars.reportId,
+&#10;	correlationId: vars.correlationId,
+&#10;	"message": "Record updated!!!"
+&#10;}]' />
+						</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="50fa21b6-b0fb-4280-8d49-fdb58760e74d" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+						
+</otherwise>
+					</choice>
+
+	
+</flow>
+	<flow name="patchtReportDeatilsFlow" doc:id="abab380d-9235-46a2-bc29-a425c44264c0" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="ea5329a5-4cae-45c0-a6de-d22c22c51cb9" message=" Request recieved for patchReportDetailsFlow "/>
+		<set-variable value="#[message.payload.reportDetails[0].reportId]" doc:name="reportID" doc:id="80940964-c503-4bec-920f-ede518e9817f" variableName="reportId" />
+		<salesforce:query doc:name="Query expense detail based in ID" doc:id="02bf115f-cd00-415a-9512-cab7984cd82e" config-ref="Salesforce_Config" target="fetchedId" >
+			<salesforce:salesforce-query ><![CDATA[select Id from Expense_detail__c where External_ID__c= ':id'
+]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	id : vars.reportId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="If record exists" doc:id="8d53c766-2d4b-41a1-bb09-0ab0518e42f2" >
+			<when expression="#[isEmpty(vars.fetchedId[0].Id)==false]">
+				<ee:transform doc:name="DW Map Payload with Required Fields" doc:id="6676ce23-d96b-4c94-8edf-3a0882b62ede">
+			<ee:message>
+				<ee:set-payload resource="dwl/patch-report-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:update type="Expense_detail__c" doc:name="Update expense detail" doc:id="4a906a01-9f2b-4852-a578-91b2a65f3731" config-ref="Salesforce_Config" />
+				<logger level="INFO" doc:name="Success Message" doc:id="905ea9d1-6fc1-4407-96e3-2b3e4d6634bb" message='#[%dw 2.0
+&#10;output application/json skipNullOn="everywhere"
+&#10;---
+&#10;{
+&#10;	reportId: vars.reportId,
+&#10;	correlationId: vars.correlationId,
+&#10;	"message": "Record updated!!!"
+&#10;}]'/>
+			</when>
+			<otherwise >
+				<raise-error doc:name="NOT_FOUND" doc:id="6f5538de-f461-4985-b5ea-8fbf8280460e" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+
+	
+</flow>
+	<flow name="getReportDetailsFlow" doc:id="98f5c3c5-82b1-4589-9e4e-1ca3b185bcc4" >
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="47bb5a20-5b6b-41bc-90b1-6cc74b5cb625" message="Request received from getReportDetailsFlow"/>
+		<salesforce:query doc:name="Query expense detail" doc:id="de8e2160-11f2-4e2b-80b4-907204d8f645" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[Select Account__c,Approval__c,Billable__c,Class__c,Currency__c,Customer__c,Date__c,Department__c,EmployeeId__c,EmployeeName__c,ExchangeRate__c,External_ID__c,Location__c,Memo__c,NonReimbursable__c,
+PaymentStatus__c,Purpose__c,RecordType__c,reportEntryId__c,SpendCategory__c,TransactionAmount__c,Subsidiary__c,TransactionCurrencyName__c,TransactionDate__c from Expense_detail__c]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="JAVA to JSON" doc:id="d56c80bc-dcfa-4713-96e8-a0fc9711f17e" >
+			<ee:message >
+				<ee:set-payload resource="dwl/get-report-summary-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="37516455-c831-472b-aa2e-8cef9bfa3343" message="Response sent from getReportDetailsFlow"/>
+
+	</flow>
+	<flow name="getReportSummaryByIdFlow" doc:id="7a95e2f5-9e2f-4950-9c67-7a0e4158e972">
+		<logger level="INFO" doc:name="LOG START of flow" doc:id="c948ee2a-f4d8-49a8-bc82-a967fedb4ff0" message=" Request recieved for getReportSummaryByIdFlow " />
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="bc52d7d2-08ae-4c93-9164-0c7e9f6ab77a" variableName="correlationId" />
+		<salesforce:query doc:name="Query expense summary based on ID" doc:id="eae891ba-0490-4eb8-a296-624db2d6633b" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[Select ApprovalStatus__c,ApproverLoginID__c,EmployeeName__c,ExpenseUserLoginID__c,External_ID__c,LastComment__c,Memo__c,PaymentStatus__c,RecordType__c,ReportCurrency__c,ReportDate__c,ReportTotal__c from Expense_summary__c where External_ID__c = ':externalId']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[{
+	'externalId' : attributes.uriParams.Id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="If record exists" doc:id="2c866068-3ddc-49fb-a929-82b8086186c3">
+			<when expression="#[isEmpty(payload)==false]">
+				<ee:transform doc:name="Success Response" doc:id="fa47ee48-b646-4f3f-8136-f0b5814ad0a8">
+					<ee:message>
+						<ee:set-payload resource="dwl/get-report-summary-details.dwl"></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="5d239d5e-875e-427b-9bb7-5684508c9258" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of flow" doc:id="70992b2e-bfaf-419b-8d07-1baa93f2a453" message=" Response sent for getReportSummaryByIdFlow " />
+
+	
+</flow>
+	
+	
+
+</mule>

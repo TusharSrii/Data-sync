@@ -1,0 +1,29 @@
+%dw 2.0
+
+type auto_5295f707_2fff_4cb4_ab6d_9c27412dcb18_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {| correlationId?: String |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    approvalStatus?: "In-Review" | "Approved" | "Not-Approved", 
+    transactionDate?: String, 
+    offset?: Number, 
+    limit?: Number, 
+    page?: Number
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+

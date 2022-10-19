@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+
+	<error-handler name="global_error_handler">
+		 <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="4b5488ce-3d92-4893-a996-38b5ddd13ccb" variableName="errorDescription" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="dac09b51-2d9d-4707-a130-a950160caa9f" variableName="errorDescription" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="e56408d1-109c-4243-9f39-dc0a2e4735e4" variableName="errorDescription" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="67e1554f-4b32-4b4f-a4b9-579caa6c2694" variableName="errorDescription" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="2c79fd3d-9f91-42bc-8206-85df85e7be15" variableName="errorDescription" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="592eaf67-1240-43b5-bf90-c08fbbf24a62" variableName="errorDescription" />
+            
+</on-error-propagate>
+                        <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="21593951-56c3-497c-a712-f944dfc7373e" variableName="errorDescription" />
+            
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="26bd82b9-d9e4-49e2-899c-c193051e3607" type="RECORD:NOT_FOUND">
+			<set-variable value='#["404"]' doc:name="httpStatus" doc:id="67cd22b1-9cb9-46fb-8d3e-a2b2299d4089" variableName="httpStatus"/>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="ed4cb4a0-d28c-4564-a183-a4c7c9b9429b" variableName="errorDescription"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a41dd6c1-f0f8-4b97-b3c8-6d2e92272040" type="RECORD:DUPLICATE">
+			<set-variable value='#["409"]' doc:name="httpStatus" doc:id="f3d3c16a-8fc0-424b-b68b-69fb1b12e6a1" variableName="httpStatus"/>
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="d518bb93-9ffb-4010-b8c2-85f1e49fd308" variableName="errorDescription"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b1a80e6b-9028-47a8-a020-1e3a19a4a0a0" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, DB:RETRY_EXHAUSTED">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="0bb15362-a1f0-42df-bb15-acc3ffa4bb0e"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable value='#["500"]' doc:name="httpStatus" doc:id="4e9fd525-f15a-4e00-987d-b8ca5407dd98" variableName="httpStatus" />
+			<set-variable value="#[error.description]" doc:name="errorDescription" doc:id="f80344e3-13fe-42a9-a7a6-b7c142f650a6" variableName="errorDescription" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="b431f6d1-433d-46b1-88eb-44b110384be9" type="ANY">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="9e16266b-ae00-4909-b08b-0b283f0d46d0"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='#["500"]' doc:name="httpStatus"
+				doc:id="6143fbc8-5a90-4f49-b337-857ff17343db"
+				variableName="httpStatus" />
+			<set-variable value="#[error.description]"
+				doc:name="errorDescription"
+				doc:id="1209573c-d702-4d2d-81e5-ee457d8d2f11"
+				variableName="errorDescription" />
+		</on-error-propagate>
+
+</error-handler>
+
+</mule>

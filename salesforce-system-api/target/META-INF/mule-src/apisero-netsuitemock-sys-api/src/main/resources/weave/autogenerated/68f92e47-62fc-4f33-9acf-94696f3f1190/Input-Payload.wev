@@ -1,0 +1,18 @@
+%dw 2.0
+
+type auto_68f92e47_62fc_4f33_9acf_94696f3f1190_Input_Payload = {
+  reportTotal?: Number, 
+  approvalStatus?: String, 
+  reportCurrency?: String, 
+  employeeName?: String, 
+  expenseUserLoginID?: String, 
+  ledgerName?: String, 
+  reportName?: String, 
+  reportId?: String, 
+  reportDate?: String, 
+  lastComment?: String, 
+  approverLoginID?: String, 
+  paymentStatus?: String, 
+  _?: Any
+}
+

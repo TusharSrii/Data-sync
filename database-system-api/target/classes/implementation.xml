@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="get-report-summary-flow" doc:id="88b2e1e3-4b77-47be-a634-0d73c44a103c" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="4e65467b-a449-45e6-9691-8a670ac38f92" message='Request recieved for get-report-summary-flow'/>
+		<choice doc:name="If Pagination or transactionTime or approval status" doc:id="216e2f41-51b2-4ff9-9d34-a0ee6e95777b" >
+			<when expression="#[!isEmpty(message.attributes.queryParams.page)]">
+				<set-variable value="#[message.attributes.queryParams.page]" doc:name="page" doc:id="f43a854b-e0dc-4e9f-87ac-0144e0275757" variableName="page" />
+				<vm:publish doc:name="page" doc:id="ef21b75e-2990-428a-a749-be958fe24264" config-ref="VM_Config" queueName="page">
+					<vm:content ><![CDATA[#[{
+	"page": vars.page ,
+	"flow" : "summary"
+}]]]></vm:content>
+				</vm:publish>
+				<vm:consume doc:name="output" doc:id="5e68ed07-d727-484c-99fc-37bc01aa3392" queueName="output" config-ref="VM_Config" timeout="20"/>
+				<ee:transform doc:name="Success Response" doc:id="7de6d896-13fa-45e9-837a-b39513e9f146" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[!isEmpty(attributes.queryParams.approvalStatus)]">
+				<db:select doc:name="Select Based on Approval Status" doc:id="70e66bd1-adb6-4122-8fd0-540c95319b8d" config-ref="Database_Config" >
+					<db:sql ><![CDATA[select * from reportList WHERE approvalStatus=:approvalStatus]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	'approvalStatus' : attributes.queryParams.approvalStatus
+}]]]></db:input-parameters>
+				</db:select>
+			</when>
+			<when expression="#[!isEmpty(attributes.queryParams.transactionTime)]">
+				<db:select doc:name="SelectBasedOntransactionTime" doc:id="33fba3b2-ae33-4116-9b0c-e601a1f680e8" config-ref="Database_Config" >
+					<db:sql ><![CDATA[select * from reportList WHERE transactionTime > :transactionTime]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	'transactionTime' : attributes.queryParams.transactionTime
+}]]]></db:input-parameters>
+				</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="Get all report summary" doc:id="fdbbbeec-aad4-4bf4-8bb0-2d103d5fc229" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from reportList ]]></db:sql>
+		</db:select>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="JAVA to JSON" doc:id="3058b6b0-7f62-40ff-9e33-9bff2b01bd5c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="cac9b7fa-f4d8-4625-9092-a27430e24988" message="Response sent for get-report-summary-flow"/>
+
+	
+	
+</flow>
+	<flow name="post-report-summary-flow" doc:id="9e6c56f5-9ad0-4b96-b1ba-97623d5aa572" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="c85ca461-7ff3-42c8-9e51-83a22513a348" message='Request recieved for post-report-summary-flow'/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="df56227f-d6c0-4aac-a976-6ae38b44934c" name="setVarsSubFlow"/>
+		<flow-ref doc:name="ifExistSumSubFlow" doc:id="00b528fd-282c-4cfe-9db1-d5def3268b7c" name="ifExistSumSubFlow"/>
+		<choice doc:name="If record exists" doc:id="2a7fa2c0-d017-4687-8dfe-296214c515bf" >
+			<when expression="#[vars.exists==true]">
+				<raise-error doc:name="CONFLICT" doc:id="9712697c-8d18-4a51-9301-019ebbd6da57" type="RECORD:DUPLICATE" description="Record Already Exists"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Set Payload" doc:id="a3a87120-e36a-4edf-ac25-345db10b5dc7" />
+				<db:insert doc:name="Insert sumary details" doc:id="c1d867a9-761f-4d11-90ff-edae462e629f">
+				<db:sql><![CDATA[INSERT INTO reportList (reportId,reportName,reportTotal,reportCurrency,reportDate,lastComment,expenseUserLoginId,approverLoginId,employeeName,approvalStatus,paymentStatus,ledgerName) VALUES 
+(:reportId, :reportName, :reportTotal, :reportCurrency, :reportDate, :lastComment, :expenseUserLoginId, :approverLoginId, :employeeName, :approvalStatus, :paymentStatus, :ledgerName)]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	'reportId': payload.reportId,
+	'reportName': payload.reportName,
+	'reportTotal': payload.reportTotal,
+	'reportCurrency': payload.reportCurrency,
+	'reportDate': payload.reportDate,
+	'lastComment': payload.lastComment,
+	'expenseUserLoginId': payload.expenseUserLoginId,
+	'approverLoginId': payload.approverLoginId,
+	'employeeName': payload.employeeName,
+	'approvalStatus': payload.approvalStatus,
+	'paymentStatus': payload.paymentStatus,
+	'ledgerName': payload.ledgerName
+}]]]></db:input-parameters>
+			</db:insert>
+				<ee:transform doc:name="Success Response" doc:id="0bb92b3d-fda7-4491-b31b-e5ce8be4d787">
+			<ee:message>
+				<ee:set-payload><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Record Added successfully " ,
+	"correlationId": vars.correlationId,
+	"reportId" : vars.reportId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="a6b67382-63e9-4937-a24b-d8cad8d33d0a" message="Response sent for post-report-summary-flow"/>
+
+	
+	</flow>
+	<flow name="put-report-summary-flow" doc:id="29e2d3d6-b5e7-407c-a2bf-79943d761621" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="652e2951-7890-48f2-aa25-d30ea1e428b7" message='PutReportStartLogger'/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="60fd993c-c3db-4fdd-b59b-3b9e6c70522f" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistSumSubFlow" doc:id="f33ec1c6-eee3-4ef4-9356-6338423dd13c" name="ifExistSumSubFlow" />
+		<choice doc:name="If record exists" doc:id="74b927af-fa47-4416-a28d-5831126725cb" >
+			<when expression="#[vars.exists==true]">
+				<set-payload value="#[vars.body]" doc:name="payload" doc:id="5b07708a-43c5-4372-82a2-abeea5306f3a" />
+				<db:update doc:name="Updating Record in Database" doc:id="1a225bf5-3f61-482e-94fa-0b80a06023d1">
+					<db:sql ><![CDATA[UPDATE reportList SET reportName =:reportName,reportTotal= :reportTotal,reportCurrency=:reportCurrency,reportDate=:reportDate,lastComment=:lastComment,expenseUserLoginId=:expenseUserLoginId,approverLoginId=:approverLoginId,employeeName=:employeeName,approvalStatus=:approvalStatus,paymentStatus=:paymentStatus,ledgerName=:ledgerName WHERE reportId=:reportId]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	'reportId': payload.reportId,
+	'reportName': payload.reportName,
+	'reportTotal': payload.reportTotal,
+	'reportCurrency': payload.reportCurrency,
+	'reportDate': payload.reportDate,
+	'lastComment': payload.lastComment,
+	'expenseUserLoginId': payload.expenseUserLoginId,
+	'approverLoginId': payload.approverLoginId,
+	'employeeName': payload.employeeName,
+	'approvalStatus': payload.approvalStatus,
+	'paymentStatus': payload.paymentStatus,
+	'ledgerName': payload.ledgerName
+}]]]></db:input-parameters>
+				</db:update>
+				<ee:transform doc:name="Success Message" doc:id="7fa59fb8-73c7-4a3f-a2ff-9ca37bec7371" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Data Updated successfully",
+	"correlationId": vars.correlationId,
+	"reportId" : vars.reportId
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="payload" doc:id="e9c031fa-5840-49fd-ad5a-cdb184379fb2" />
+				<db:insert doc:name="Insert sumary details" doc:id="e7046e82-bd59-4151-81be-7368aa5c988d">
+			<db:sql><![CDATA[INSERT INTO reportList (reportId,reportName,reportTotal,reportCurrency,reportDate,lastComment,expenseUserLoginId,approverLoginId,employeeName,approvalStatus,paymentStatus,ledgerName) VALUES 
+(:reportId, :reportName, :reportTotal, :reportCurrency, :reportDate, :lastComment, :expenseUserLoginId, :approverLoginId, :employeeName, :approvalStatus, :paymentStatus, :ledgerName)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'reportId': payload.reportId,
+	'reportName': payload.reportName,
+	'reportTotal': payload.reportTotal,
+	'reportCurrency': payload.reportCurrency,
+	'reportDate': payload.reportDate,
+	'lastComment': payload.lastComment,
+	'expenseUserLoginId': payload.expenseUserLoginId,
+	'approverLoginId': payload.approverLoginId,
+	'employeeName': payload.employeeName,
+	'approvalStatus': payload.approvalStatus,
+	'paymentStatus': payload.paymentStatus,
+	'ledgerName': payload.ledgerName
+}]]]></db:input-parameters>
+		</db:insert>
+				<ee:transform doc:name="Success Message" doc:id="252183b3-0600-4bbd-962e-055ca7e9e00f">
+			<ee:message>
+				<ee:set-payload><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Record Added successfully",
+	"correlationId": vars.correlationId,
+	"reportId" : vars.reportId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="a8299171-8dc4-41fc-9700-3d7fd2294b7f" message="Response sent for put-report-summary-flow"/>
+
+	
+	
+</flow>
+	<flow name="patch-report-summary-flow" doc:id="6625d3e1-4fd6-49ea-85f4-6f6eb4f6d25b">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="45b93c19-27f1-40d8-aad1-d7dcbd34d895" message="Request recieved for patch-report-summary-flow"/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="cb0c4a8b-17bd-470e-b014-8c33e8f2b56d" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistSumSubFlow" doc:id="c3c608a4-cb6b-49d4-9f03-bcf4b23c0898" name="ifExistSumSubFlow" />
+		<choice doc:name="If record exists" doc:id="adaffc6e-cafa-4d64-bceb-537446a84ace" >
+			<when expression="#[vars.exists==false]">
+				<raise-error doc:name="NOT_FOUND" doc:id="321c4cdf-b5f0-4313-8ad0-e97166205127" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Payload" doc:id="e15b810b-e760-48d1-8ba6-b39b745565f7" />
+				<db:update doc:name="Updating Record in Database" doc:id="6e521124-1135-4711-8fd9-405425003c77">
+					<db:sql><![CDATA[UPDATE reportList SET reportName =:reportName,reportTotal= :reportTotal,reportCurrency=:reportCurrency,reportDate=:reportDate,lastComment=:lastComment,expenseUserLoginId=:expenseUserLoginId,approverLoginId=:approverLoginId,employeeName=:employeeName,approvalStatus=:approvalStatus,paymentStatus=:paymentStatus,ledgerName=:ledgerName WHERE reportId=:reportId]]></db:sql>
+					<db:input-parameters><![CDATA[#[{
+	'reportId': payload.reportId,
+	'reportName': payload.reportName,
+	'reportTotal': payload.reportTotal,
+	'reportCurrency': payload.reportCurrency,
+	'reportDate': payload.reportDate,
+	'lastComment': payload.lastComment,
+	'expenseUserLoginId': payload.expenseUserLoginId,
+	'approverLoginId': payload.approverLoginId,
+	'employeeName': payload.employeeName,
+	'approvalStatus': payload.approvalStatus,
+	'paymentStatus': payload.paymentStatus,
+	'ledgerName': payload.ledgerName
+}]]]></db:input-parameters>
+				</db:update>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="66284d1f-294b-4947-bb1c-8dd52e2af8c6" message="Response sent for patch-report-summary-flow"/>
+	
+</flow>
+	<flow name="get-report-summary-by-id-flow" doc:id="35a50e65-3adc-42b1-970e-04439df2e1f9">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="8dfb4483-088f-461e-a894-fe2141d377b7" message="Request recieved for get-report-summary-by-id-flow" />
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="b48f76ab-fe5f-4c49-840d-9044e135f72c" variableName="correlationId" />
+		<db:select doc:name="Get report summary based on reportID" doc:id="805ef550-6480-4d4b-83e1-c892162e6729">
+			<db:sql><![CDATA[select * from reportList WHERE reportID=:reportId]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'reportId' : attributes.uriParams.Id}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="If record exists" doc:id="85c1d57d-1e28-4704-8700-e0a30b5d56d5">
+			<when expression="#[isEmpty(payload)==false]">
+				<ee:transform doc:name="Success Response" doc:id="1d8da31c-f094-4be0-9cc7-fc9ad42ed5d1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="7adceaba-97c1-4421-953e-5c0c398ee6e7" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="ad1b1e8c-3e04-45a1-b2f1-df0ff6ec7594" message="Response sent for get-report-summary-by-id-flow" />
+	
+</flow>
+	<flow name="delete-report-summary-by-id-flow" doc:id="41716d9e-ccb6-44fe-9996-56f4f0930086" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="49bce333-b7a5-479f-a235-b6b7f466c9f3" message='DeleteReportStartLogger'/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="36c9dfcb-6944-4625-a6f7-58520d467e08" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistSumSubFlow" doc:id="d8784122-db6c-41aa-9b8b-d72cf61d1acb" name="ifExistSumSubFlow" />
+		<choice doc:name="If record exists" doc:id="bda2be4d-dceb-425a-aeb9-21b8f8bd93dd" >
+			<when expression="#[vars.exists==false]">
+				<raise-error doc:name="NOT_FOUND" doc:id="f335ae43-80d0-4cac-bd6a-c143fbd2874b" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</when>
+			<otherwise >
+				<db:delete doc:name="Delete record based in reportID" doc:id="9dfa76a9-2317-48c5-8538-30d45fd402c6">
+				<db:sql><![CDATA[DELETE FROM reportList WHERE reportId = :reportId]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	reportId : vars.reportId
+}]]]></db:input-parameters>
+			</db:delete>
+				<ee:transform doc:name="Success Response" doc:id="756eb915-880e-4605-91c9-18d73222f692">
+			<ee:message>
+				<ee:set-payload><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Data Deleted successfully" ,
+	"correlationId": vars.correlationId,
+	"reportId" : vars.reportId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="62d6f3bb-f4d6-484d-b60e-76f2fb1dd673" message="Response sent for delete-report-summary-by-id-flow"/>
+
+	
+	
+
+</flow>
+	<flow name="get-report-details-flow" doc:id="470ff6c4-a9e5-49d3-ade2-9824124dc3cd">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="f04fb0ee-a505-4cf8-ad34-c4aa999cce17" message="Request recieved for get-report-details-flow" />
+		<choice doc:name="Choice" doc:id="4e3de98c-42c8-400c-8c9e-88ecd6b0405b" >
+			<when expression="#[!isEmpty(message.attributes.queryParams.page)]">
+				<set-variable value="#[message.attributes.queryParams.page]" doc:name="page" doc:id="45141626-bddd-4060-8587-6e9a440404bf" variableName="page" />
+				<vm:publish doc:name="page" doc:id="cccceff3-af18-4c80-9e86-1b56de4e5d87" config-ref="VM_Config" queueName="page">
+					<vm:content ><![CDATA[#[{
+	"page": vars.page ,
+	"flow" : "details"
+}]]]></vm:content>
+				</vm:publish>
+				<vm:consume doc:name="output" doc:id="45035da3-528f-4ef0-9673-456988cff7a0" queueName="output" config-ref="VM_Config" timeout="20"/>
+				<ee:transform doc:name="Transform Message" doc:id="18a41e19-95a2-4106-b887-e6252261d395" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<db:select doc:name="Get all report details" doc:id="84539659-bfba-4b5f-8fb3-99374be59f9e">
+			<db:sql><![CDATA[select * from sapDb ]]></db:sql>
+		</db:select>
+			
+</otherwise>
+		</choice>
+		<ee:transform doc:name="Success Response" doc:id="efcb5100-a4cd-416a-a64f-0c46d2f5e894">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="f7ffe73d-ad5b-4fbc-9e15-4a09cea46422" message="Response sent for get-report-details-flow" />
+
+	</flow>
+	<flow name="post-report-details-flow" doc:id="5edfc67a-fea4-48e8-a94e-a139e8cb4425" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="5294b4c9-eb2d-4e7f-a7bd-2cac1e55eefd" message='Request recieved for post-report-details-flow'/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="1db37cec-1d1d-4ff5-9e3d-5f888d7247f3" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistDetSubFlow" doc:id="5a33da21-4a10-4cdd-a7f5-42aede3eeee0" name="ifExistDetSubFlow" />
+		<choice doc:name="If record exists" doc:id="dbbca81d-1418-477a-8b9e-863f23941d1b" >
+			<when expression="#[vars.exists==true]">
+				<raise-error doc:name="CONFLICT" doc:id="36cbee01-9217-48b0-af8e-c0809455578a" type="RECORD:DUPLICATE" description="Record Already Exists" />
+			
+</when>
+			<otherwise >
+				<set-payload value="#[vars.body]" doc:name="Payload" doc:id="d5007aa0-19fa-446e-b0d7-9f366cd555cf" />
+				<db:insert doc:name="Insert report details" doc:id="b07714e6-3e0d-43d7-a1f4-3bb3646632cf">
+				<db:sql><![CDATA[INSERT INTO sapDb (employeeName,reportID,reportName,reportDate,creationDate,submitDate,currencyCode,exchangeRate,reportTotal,personalExpenses,company,ledgerName,employeeBankAccount,totalClaimedAmount,totalApprovedAmount,processingPaymentDate,approvalStatusCode,approvalStatusName,paymentStatus,reportEntryId,expenseTypeID,expenseTypeName,spendCategory,
+purpose,transactionDate,transactionCurrencyName,exchangeRateFromBillingToEmployeeCurrency,transactionAmount,vendorDescription,isPersonal,orgUnit1,policyID,locationName,locationSubdivision,locationCountry,reportOwnerEmployeeId) VALUES 
+(:employeeName, :reportID, :reportName, :reportDate, :creationDate, :submitDate, :currencyCode, :exchangeRate, :reportTotal, :personalExpenses, :company, :ledgerName, :employeeBankAccount, :totalClaimedAmount, :totalApprovedAmount, :processingPaymentDate, :approvalStatusCode, :approvalStatusName, :paymentStatus, :reportEntryId, :expenseTypeID, :expenseTypeName, :spendCategory, :purpose, :transactionDate, :transactionCurrencyName, :exchangeRateFromBillingToEmployeeCurrency, :transactionAmount, :vendorDescription, :isPersonal, :orgUnit1, :policyID, :locationName, :locationSubdivision, :locationCountry, :reportOwnerEmployeeId)]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+    "employeeName": payload.employeeName,
+    "reportID": payload.reportId,
+    "reportName": payload.reportName,
+    "reportDate": payload.reportDate,
+    "creationDate": payload.creationDate,
+    "submitDate": payload.submitDate,
+    "currencyCode": payload.currencyCode,
+    "exchangeRate": payload.exchangeRate,
+    "reportTotal": payload.reportTotal,
+    "personalExpenses": payload.personalExpenses,
+    "company": payload.company,
+    "ledgerName": payload.ledgerName,
+    "employeeBankAccount": payload.employeeBankAccount,
+    "totalClaimedAmount": payload.totalClaimedAmount,
+    "totalApprovedAmount": payload.totalApprovedAmount,
+    "processingPaymentDate": payload.processingPaymentDate,
+    "approvalStatusCode": payload.approvalStatusCode,
+    "approvalStatusName": payload.approvalStatusName,
+    "paymentStatus": payload.paymentStatus,
+    "reportEntryId": payload.reportEntryId,
+    "expenseTypeID": payload.expenseTypeID,
+    "expenseTypeName": payload.expenseTypeName,
+    "spendCategory": payload.spendCategory,
+    "purpose": payload.purpose,
+    "transactionDate": payload.transactionDate,
+    "transactionCurrencyName": payload.transactionCurrencyName,
+    "exchangeRateFromBillingToEmployeeCurrency": payload.exchangeRateFromBillingToEmployeeCurrency,
+    "transactionAmount": payload.transactionAmount,
+    "vendorDescription": payload.vendorDescription,
+    "isPersonal": payload.isPersonal,
+    "orgUnit1": payload.orgUnit1,
+    "policyID": payload.policyID,
+    "locationName": payload.locationName,
+    "locationSubdivision": payload.locationSubdivision,
+    "locationCountry": payload.locationCountry,
+    "reportOwnerEmployeeId": payload.reportOwnerEmployeeId
+}]]]></db:input-parameters>
+			</db:insert>
+				<ee:transform doc:name="Success Response" doc:id="902ac5a8-b0fc-4249-8a06-cb7697feb3d7">
+			<ee:message>
+				<ee:set-payload><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Record Added successfully " ,
+	"correlationId": vars.correlationId,
+	"reportID": vars.reportId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="1a72fb5d-6529-4b7a-9044-ba93036b4a4e" message="Response sent for post-report-details-flow"/>
+
+	
+
+</flow>
+	<flow name="put-report-details-flow" doc:id="da23cbb2-421b-462c-b24a-3e8407602169">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="e60e27c4-4e7c-429f-bef7-d509610c8c80" message="PutReportStartLogger" />
+		<flow-ref doc:name="setVarsSubFlow" doc:id="ddee2b18-e523-4861-ba8f-fa272bd05c86" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistDetSubFlow" doc:id="c77a1073-ed9a-4165-93f1-c99a23d4fe7c" name="ifExistDetSubFlow" />
+		<choice doc:name="If report exists or not" doc:id="627a3d04-d043-42af-b818-ef83c96d3884">
+			<when expression="#[vars.exists==true]">
+				<set-payload value="#[vars.body]" doc:name="payload" doc:id="9604a75c-0aa3-442a-a708-94ae3be432f0" />
+				<db:update doc:name="Updating Report Details" doc:id="38309e4b-f8e6-41b8-a49d-6d07e0902471">
+				<db:sql><![CDATA[UPDATE sapDb SET employeeName = :employeeName,		
+reportName= :reportName,
+reportDate= :reportDate,
+creationDate= :creationDate,	
+submitDate= :submitDate,	
+currencyCode= :currencyCode,	
+exchangeRate= :exchangeRate,
+reportTotal= :reportTotal,
+personalExpenses= :personalExpenses,
+company=:company,
+ledgerName= :ledgerName,
+employeeBankAccount= :employeeBankAccount,	
+totalClaimedAmount= :totalClaimedAmount,
+totalApprovedAmount= :totalApprovedAmount,	
+processingPaymentDate= :processingPaymentDate,
+approvalStatusCode= :approvalStatusCode,	
+approvalStatusName= :approvalStatusName,	
+paymentStatus= :paymentStatus,	
+reportEntryId= :reportEntryId,		
+expenseTypeID= :expenseTypeID,		
+expenseTypeName= :expenseTypeName,		
+spendCategory= :spendCategory,
+purpose= :purpose,	
+transactionDate= :transactionDate,			
+transactionCurrencyName= :transactionCurrencyName,	
+exchangeRateFromBillingToEmployeeCurrency= :exchangeRateFromBillingToEmployeeCurrency,		
+transactionAmount= :transactionAmount,
+vendorDescription= :vendorDescription,
+isPersonal= :isPersonal,
+orgUnit1= :orgUnit1,		
+policyID= :policyID,		
+locationName=  :locationName,		
+locationSubdivision= :locationSubdivision,	
+locationCountry	= :locationCountry,
+reportOwnerEmployeeId= :reportOwnerEmployeeId
+WHERE reportID= :reportID]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+    "employeeName": payload.employeeName,
+    "reportID": payload.reportId,
+    "reportName": payload.reportName,
+    "reportDate": payload.reportDate,
+    "creationDate": payload.creationDate,
+    "submitDate": payload.submitDate,
+    "currencyCode": payload.currencyCode,
+    "exchangeRate": payload.exchangeRate,
+    "reportTotal": payload.reportTotal,
+    "personalExpenses": payload.personalExpenses,
+    "company": payload.company,
+    "ledgerName": payload.ledgerName,
+    "employeeBankAccount": payload.employeeBankAccount,
+    "totalClaimedAmount": payload.totalClaimedAmount,
+    "totalApprovedAmount": payload.totalApprovedAmount,
+    "processingPaymentDate": payload.processingPaymentDate,
+    "approvalStatusCode": payload.approvalStatusCode,
+    "approvalStatusName": payload.approvalStatusName,
+    "paymentStatus": payload.paymentStatus,
+    "reportEntryId": payload.reportEntryId,
+    "expenseTypeID": payload.expenseTypeID,
+    "expenseTypeName": payload.expenseTypeName,
+    "spendCategory": payload.spendCategory,
+    "purpose": payload.purpose,
+    "transactionDate": payload.transactionDate,
+    "transactionCurrencyName": payload.transactionCurrencyName,
+    "exchangeRateFromBillingToEmployeeCurrency": payload.exchangeRateFromBillingToEmployeeCurrency,
+    "transactionAmount": payload.transactionAmount,
+    "vendorDescription": payload.vendorDescription,
+    "isPersonal": payload.isPersonal,
+    "orgUnit1": payload.orgUnit1,
+    "policyID": payload.policyID,
+    "locationName": payload.locationName,
+    "locationSubdivision": payload.locationSubdivision,
+    "locationCountry": payload.locationCountry,
+    "reportOwnerEmployeeId": payload.reportOwnerEmployeeId
+}]]]></db:input-parameters>
+			
+</db:update>
+				<ee:transform doc:name="Success Response" doc:id="abfec843-b207-4042-b8f2-b6350e04c1c5">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Data Updated successfully",
+	"correlation":vars.correlationId,
+	"reportId": vars.reportId
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<set-payload value="#[vars.body]" doc:name="payload" doc:id="457af0cf-df43-4a35-85c3-31db8a190f8c" />
+				<db:insert doc:name="Insert Report Details" doc:id="4a9d6ebb-e1e8-47fa-a0fc-16f7df087af3">
+				<db:sql><![CDATA[INSERT INTO sapDb (employeeName,reportID,reportName,reportDate,creationDate,submitDate,currencyCode,exchangeRate,reportTotal,personalExpenses,company,ledgerName,employeeBankAccount,totalClaimedAmount,totalApprovedAmount,processingPaymentDate,approvalStatusCode,approvalStatusName,paymentStatus,reportEntryId,expenseTypeID,expenseTypeName,spendCategory,
+purpose,transactionDate,transactionCurrencyName,exchangeRateFromBillingToEmployeeCurrency,transactionAmount,vendorDescription,isPersonal,orgUnit1,policyID,locationName,locationSubdivision,locationCountry,reportOwnerEmployeeId) VALUES 
+(:employeeName, :reportID, :reportName, :reportDate, :creationDate, :submitDate, :currencyCode, :exchangeRate, :reportTotal, :personalExpenses, :company, :ledgerName, :employeeBankAccount, :totalClaimedAmount, :totalApprovedAmount, :processingPaymentDate, :approvalStatusCode, :approvalStatusName, :paymentStatus, :reportEntryId, :expenseTypeID, :expenseTypeName, :spendCategory, :purpose, :transactionDate, :transactionCurrencyName, :exchangeRateFromBillingToEmployeeCurrency, :transactionAmount, :vendorDescription, :isPersonal, :orgUnit1, :policyID, :locationName, :locationSubdivision, :locationCountry, :reportOwnerEmployeeId)]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+    "employeeName": payload.employeeName,
+    "reportID": payload.reportId,
+    "reportName": payload.reportName,
+    "reportDate": payload.reportDate,
+    "creationDate": payload.creationDate,
+    "submitDate": payload.submitDate,
+    "currencyCode": payload.currencyCode,
+    "exchangeRate": payload.exchangeRate,
+    "reportTotal": payload.reportTotal,
+    "personalExpenses": payload.personalExpenses,
+    "company": payload.company,
+    "ledgerName": payload.ledgerName,
+    "employeeBankAccount": payload.employeeBankAccount,
+    "totalClaimedAmount": payload.totalClaimedAmount,
+    "totalApprovedAmount": payload.totalApprovedAmount,
+    "processingPaymentDate": payload.processingPaymentDate,
+    "approvalStatusCode": payload.approvalStatusCode,
+    "approvalStatusName": payload.approvalStatusName,
+    "paymentStatus": payload.paymentStatus,
+    "reportEntryId": payload.reportEntryId,
+    "expenseTypeID": payload.expenseTypeID,
+    "expenseTypeName": payload.expenseTypeName,
+    "spendCategory": payload.spendCategory,
+    "purpose": payload.purpose,
+    "transactionDate": payload.transactionDate,
+    "transactionCurrencyName": payload.transactionCurrencyName,
+    "exchangeRateFromBillingToEmployeeCurrency": payload.exchangeRateFromBillingToEmployeeCurrency,
+    "transactionAmount": payload.transactionAmount,
+    "vendorDescription": payload.vendorDescription,
+    "isPersonal": payload.isPersonal,
+    "orgUnit1": payload.orgUnit1,
+    "policyID": payload.policyID,
+    "locationName": payload.locationName,
+    "locationSubdivision": payload.locationSubdivision,
+    "locationCountry": payload.locationCountry,
+    "reportOwnerEmployeeId": payload.reportOwnerEmployeeId
+}]]]></db:input-parameters>
+			</db:insert>
+				<ee:transform doc:name="Success Response" doc:id="1cccb0b3-b665-4daa-85a9-1e04c09152b7">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": " Data Added successfully",
+	"correlation":vars.correlationId,
+	"reportId": vars.reportId
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="11526dbf-2e87-472f-a842-85506385fff5" message="Response sent for put-report-details" />
+
+	
+	
+</flow>
+	<flow name="patch-report-details-flow" doc:id="868f2ce4-db88-4507-98f6-af76709e7e62">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="ad34c323-f8c7-4352-a0da-646023a5db76" message="Request recieved for patch-report-details-flow" />
+		<flow-ref doc:name="setVarsSubFlow" doc:id="6b2feae7-1ad1-48b2-898c-08496a4f23c3" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistDetSubFlow" doc:id="211e2b31-33a2-44ca-bccf-b499192c72de" name="ifExistDetSubFlow" />
+		<choice doc:name="If record exists" doc:id="5f587351-019b-4c28-a670-1982ef880615">
+			<when expression="#[vars.exists==false]">
+				<raise-error doc:name="NOT_FOUND" doc:id="f1696720-23ea-4cf3-9cc6-b01af1666166" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</when>
+			<otherwise>
+				<set-payload value="#[vars.body]" doc:name="Payload" doc:id="f5245776-0f66-4ba2-a17c-779af588e905" />
+				<db:update doc:name="Updating Record in Database" doc:id="eb768c70-2711-4d40-bb0e-ebfeea5d95a8">
+					<db:sql><![CDATA[UPDATE sapDb SET employeeName = :employeeName,		
+reportName= :reportName,
+reportDate= :reportDate,
+creationDate= :creationDate,	
+submitDate= :submitDate,	
+currencyCode= :currencyCode,	
+exchangeRate= :exchangeRate,
+reportTotal= :reportTotal,
+personalExpenses= :personalExpenses,
+company=:company,
+ledgerName= :ledgerName,
+employeeBankAccount= :employeeBankAccount,	
+totalClaimedAmount= :totalClaimedAmount,
+totalApprovedAmount= :totalApprovedAmount,	
+processingPaymentDate= :processingPaymentDate,
+approvalStatusCode= :approvalStatusCode,	
+approvalStatusName= :approvalStatusName,	
+paymentStatus= :paymentStatus,	
+reportEntryId= :reportEntryId,		
+expenseTypeID= :expenseTypeID,		
+expenseTypeName= :expenseTypeName,		
+spendCategory= :spendCategory,
+purpose= :purpose,	
+transactionDate= :transactionDate,			
+transactionCurrencyName= :transactionCurrencyName,	
+exchangeRateFromBillingToEmployeeCurrency= :exchangeRateFromBillingToEmployeeCurrency,		
+transactionAmount= :transactionAmount,
+vendorDescription= :vendorDescription,
+isPersonal= :isPersonal,
+orgUnit1= :orgUnit1,		
+policyID= :policyID,		
+locationName=  :locationName,		
+locationSubdivision= :locationSubdivision,	
+locationCountry	= :locationCountry,
+reportOwnerEmployeeId= :reportOwnerEmployeeId
+WHERE reportID= :reportID]]></db:sql>
+					<db:input-parameters><![CDATA[#[{
+    "employeeName": payload.employeeName,
+    "reportID": payload.reportId,
+    "reportName": payload.reportName,
+    "reportDate": payload.reportDate,
+    "creationDate": payload.creationDate,
+    "submitDate": payload.submitDate,
+    "currencyCode": payload.currencyCode,
+    "exchangeRate": payload.exchangeRate,
+    "reportTotal": payload.reportTotal,
+    "personalExpenses": payload.personalExpenses,
+    "company": payload.company,
+    "ledgerName": payload.ledgerName,
+    "employeeBankAccount": payload.employeeBankAccount,
+    "totalClaimedAmount": payload.totalClaimedAmount,
+    "totalApprovedAmount": payload.totalApprovedAmount,
+    "processingPaymentDate": payload.processingPaymentDate,
+    "approvalStatusCode": payload.approvalStatusCode,
+    "approvalStatusName": payload.approvalStatusName,
+    "paymentStatus": payload.paymentStatus,
+    "reportEntryId": payload.reportEntryId,
+    "expenseTypeID": payload.expenseTypeID,
+    "expenseTypeName": payload.expenseTypeName,
+    "spendCategory": payload.spendCategory,
+    "purpose": payload.purpose,
+    "transactionDate": payload.transactionDate,
+    "transactionCurrencyName": payload.transactionCurrencyName,
+    "exchangeRateFromBillingToEmployeeCurrency": payload.exchangeRateFromBillingToEmployeeCurrency,
+    "transactionAmount": payload.transactionAmount,
+    "vendorDescription": payload.vendorDescription,
+    "isPersonal": payload.isPersonal,
+    "orgUnit1": payload.orgUnit1,
+    "policyID": payload.policyID,
+    "locationName": payload.locationName,
+    "locationSubdivision": payload.locationSubdivision,
+    "locationCountry": payload.locationCountry,
+    "reportOwnerEmployeeId": payload.reportOwnerEmployeeId
+}]]]></db:input-parameters>
+				</db:update>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="0bd084fd-f4bc-482c-8049-38893f08f7ea" message="Response sent for patch-report-details-flow" />
+	
+</flow>
+	<flow name="get-report-details-by-id-flow" doc:id="68ada709-5544-44e4-aa2f-579774a0e03c">
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="84f29eab-747d-4640-ac3d-ca261f92dd21" message="Request recieved for get-report-details-by-id-flow" />
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationID" doc:id="2ed810cf-3567-4189-a84b-fb83bef9e851" variableName="correlationId" />
+		<db:select doc:name="Get report details based on reportID" doc:id="dd1e76aa-06d3-48a2-8ae9-c46d5c13bd15">
+			<db:sql><![CDATA[select * from sapDb WHERE reportID=:reportId]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'reportId' : attributes.uriParams.Id}]]]></db:input-parameters>
+		
+</db:select>
+		<choice doc:name="If record exists" doc:id="999f7f9b-7d80-4207-ac66-ae799b479732">
+			<when expression="#[isEmpty(payload)==false]">
+				<ee:transform doc:name="Success Response" doc:id="021d765f-df4e-4964-8c3e-0e893c7c2c23" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<raise-error doc:name="NOT_FOUND" doc:id="9bbfe883-0d09-4715-808c-054894945225" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="936851b5-2e40-44fd-9609-424c127084fa" message="Response sent for get-report-details-by-id-flow" />
+
+	
+	
+
+</flow>
+	<flow name="delete-report-details-by-id-flow" doc:id="7855bca7-9228-4c8f-961e-2d291e3349f9" >
+		<logger level="INFO" doc:name="LOG START of Flow" doc:id="3ce690c2-cc4c-4311-b7c9-ee672af88109" message='DeleteReportStartLogger'/>
+		<flow-ref doc:name="setVarsSubFlow" doc:id="b977970e-cc53-44b3-92ec-6f57a97ac906" name="setVarsSubFlow" />
+		<flow-ref doc:name="ifExistDetSubFlow" doc:id="4c47235e-1f06-45c2-ae0b-4f2b06c0c93e" name="ifExistDetSubFlow" />
+		<choice doc:name="If report exists" doc:id="36897de3-7125-4439-b7b7-bf2897313bf6" >
+			<when expression="#[vars.exists==false]">
+				<raise-error doc:name="NOT_FOUND" doc:id="c85cace8-7f58-48e7-ae52-8e61bf841ec1" type="RECORD:NOT_FOUND" description="Record Does Not Exists" />
+			
+</when>
+			<otherwise>
+				<db:delete doc:name="Delete records based on reportID" doc:id="6afb4634-cc35-4b46-a126-c1270f18ced5">
+				<db:sql><![CDATA[DELETE FROM sapDb WHERE reportID = :reportID]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	reportID : vars.reportId
+}]]]></db:input-parameters>
+			</db:delete>
+				<ee:transform doc:name="Success Response" doc:id="fe661f7b-adb8-46c7-9199-d80aece38f3a">
+			<ee:message>
+				<ee:set-payload><![CDATA[
+%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+{
+	"message": "Data Deleted successfully",
+	"correlationId": vars.correlationId,
+	"reportId" : vars.reportId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG END of Flow" doc:id="1dead86c-4039-4335-9034-66297a74bff5" message="Response sent for delete-report-details-by-id-flow"/>
+
+	
+
+</flow>
+	<sub-flow name="setVarsSubFlow" doc:id="90276c68-aba8-440a-a056-52a71f11a7b0">
+		<set-variable value="#[message.attributes.headers.correlationId]" doc:name="correlationId" doc:id="5b55a407-74af-4603-897f-c2eb0150da44" variableName="correlationId" />
+		<set-variable value="#[message.payload]" doc:name="body" doc:id="311fb526-5900-4a8a-b4a7-7fa6b7742ef9" variableName="body" />
+		<choice doc:name="Choice" doc:id="0f721513-057a-4991-a94a-25d1fa8720a5">
+			<when expression="#[isEmpty(message.attributes.uriParams.Id)==false]">
+				<set-variable value="#[message.attributes.uriParams.Id]" doc:name="reportId" doc:id="e5bf564d-4c4e-4034-b03d-a4aae532c32b" variableName="reportId" />
+			</when>
+			<otherwise>
+				<set-variable value="#[message.payload.reportId]" doc:name="reportId" doc:id="1f334d81-f6d6-4be1-8301-e3b85636ea40" variableName="reportId" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="ifExistSumSubFlow" doc:id="3b9142bd-95ed-498c-96eb-a3de077a5592">
+		<db:select doc:name="Select report summary based on reportId" doc:id="9cfaad26-bd38-451a-a07c-a3a5eb00be9a">
+			<db:sql><![CDATA[select reportName from reportList WHERE reportId= :reportId]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'reportId': vars.reportId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="4a7cd2cf-fbfa-466b-937d-40d036cff6df">
+			<when expression="#[sizeOf(payload)==0]">
+				<set-variable value="#[false]" doc:name="exists" doc:id="412cd2df-7a8b-4702-b76a-68d91ce11e22" variableName="exists" />
+			</when>
+			<otherwise>
+				<set-variable value="#[true]" doc:name="exists" doc:id="d5496c60-d8e6-4637-8180-644c1b9cfb75" variableName="exists" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="ifExistDetSubFlow" doc:id="f7a52213-43f6-41a6-be88-5c049febe4cb" >
+		<db:select doc:name="Get report details based on reportID" doc:id="cd47ea30-7a80-4885-9752-41db74d8f6ce">
+			<db:sql><![CDATA[select reportName from sapDb WHERE reportID= :reportID]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'reportID': vars.reportId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="1ba97c16-e449-4e6e-a6ee-1c06a64280c2" >
+			<when expression="#[sizeOf(payload)==0]" >
+				<set-variable value="#[false]" doc:name="exists" doc:id="5446cc41-8a06-445d-800b-2ee47eaf725b" variableName="exists" />
+			</when>
+			<otherwise >
+				<set-variable value="#[true]" doc:name="exists" doc:id="0086f523-9139-424b-ab95-b312a68af688" variableName="exists" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+<flow name="paginationFlowSummary" doc:id="7faf9608-bb31-4240-81c9-ed8ce97374f4" >
+		<vm:listener queueName="page" doc:name="page" doc:id="b9bc8bf9-9f22-4259-8664-697bc474703d" config-ref="VM_Config"/>
+		<logger level="INFO" doc:name="Start Logger" doc:id="07855dc7-a487-4c39-a301-86d6ab3157e7" message="start pagination"/>
+		<set-variable value="#[payload.flow]" doc:name="flow_name" doc:id="c2fd7985-d6d8-4dc6-8bcd-6503425c1fd1" variableName="flow"/>
+		<set-variable value="#[payload.page as Number]" doc:name="page" doc:id="e9c8f559-ecde-4fe3-a291-8a9de8d4bb68" variableName="page" />
+		<set-variable value="#[1 as Number]" doc:name="inc" doc:id="209b0eae-7bc2-4e54-838c-7d471aa0d2c6" variableName="inc" />
+		<set-variable value="#[1 as Number]" doc:name="limit" doc:id="fcfab1a7-fa55-4928-833b-0d450b40c00c" variableName="limit"/>
+		<os:retrieve doc:name="pagelimit" doc:id="fbb63a24-600a-4c65-8ff5-66e11a80716e" key="pagelimit" target="pagelimit" objectStore="Object_store_page">
+			<os:default-value ><![CDATA[#[1]]]></os:default-value>
+		</os:retrieve>
+		<os:retrieve doc:name="offset" doc:id="17fcb0cb-083e-4e4d-845a-839d71b28546" key="offset" target="offset" objectStore="Object_store_limit">
+			<os:default-value ><![CDATA[#[0]]]></os:default-value>
+		</os:retrieve>
+		<choice doc:name="Choice" doc:id="3957a1fd-f857-44b4-a42d-eebfd696c01a" >
+			<when expression='#[vars.flow == "summary"]'>
+				<db:select doc:name="Get Report summary" doc:id="5c6a4ae4-16e5-48e2-ad2d-feb4b19d4193" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from reportList
+limit :offset , :limit]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	'offset' : vars.offset ,
+	'limit' : vars.limit as Number
+}]]]></db:input-parameters>
+		</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="Get all report details" doc:id="45cf0fda-8ec7-4ccc-9791-06937eac4a11" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from sapDb 
+limit :offset , :limit]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	'offset' : vars.offset ,
+	'limit' : vars.limit as Number
+}]]]></db:input-parameters>
+				</db:select>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="6fe8eccf-6cda-4f15-b6b9-89815f26928c" message='#[" Page" ++ (vars.pagelimit as Number &lt; vars.page)]' />
+		<choice doc:name="Choice" doc:id="a9dc003f-6dfc-43d3-bad4-4d6a5e37dfa2" >
+			<when expression="#[(vars.pagelimit as Number &lt; vars.page) and ((!isEmpty(payload)) and (sizeOf(payload)== vars.limit as Number))]">
+				<logger level="INFO" doc:name="vars.offset" doc:id="c5dd2fef-89f7-4a23-81d1-069e46ca94b8" message="#[vars.offset]"/>
+				<os:store doc:name="offset" doc:id="0a2dd22a-5a04-4ab2-bd0f-312e6d372d79" key="offset" objectStore="Object_store_limit">
+					<os:value ><![CDATA[#[vars.offset + vars.limit]]]></os:value>
+				</os:store>
+				<os:store doc:name="pagelimit" doc:id="f3e55bb8-dae1-4429-948e-f5618c8842a1" key="pagelimit" objectStore="Object_store_page">
+					<os:value ><![CDATA[#[(vars.pagelimit as Number) + vars.inc]]]></os:value>
+				</os:store>
+				<logger level="INFO" doc:name="Logger" doc:id="d3b63163-5f33-4452-849c-d5a374cce929" message='#[vars.pagelimit]'/>
+				<vm:publish queueName="page" doc:name="page" doc:id="88af91cf-f339-44fb-9af5-2eaffafe238f" config-ref="VM_Config">
+					<vm:content ><![CDATA[#[{
+	"page":vars.page ,
+	"flow":vars.flow
+}]]]></vm:content>
+				</vm:publish>
+			
+
+</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="73fc17c6-84d0-4d9d-81b2-648af0574817">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<os:clear doc:name="Clear limit" doc:id="cadde3fd-2f86-4b62-bf50-ff8e17403c36" objectStore="Object_store_limit"/>
+				<os:clear doc:name="Clear page" doc:id="3db076c0-9620-4f90-8ce6-b7ee9b1c9491" objectStore="Object_store_page"/>
+				<vm:publish doc:name="output" doc:id="fbcd860a-f515-4b43-a11b-55021d3f1f79" config-ref="VM_Config" queueName="output" timeout="20"/>
+			
+
+
+</otherwise>
+		</choice>
+	
+</flow>	
+</mule>

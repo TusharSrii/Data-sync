@@ -1,0 +1,113 @@
+#%RAML 1.0
+title: apisero-netsuitemock-sys-api
+mediaType:
+  - application/json
+version: 1.0.0
+protocols:
+  - HTTP
+  - HTTPS
+
+uses:
+  lib: exchange_modules/e6df9ba3-9c72-41fc-9ec5-724ba6cc6114/expensereportslibrary/1.0.0/expensereportslibrary.raml
+
+securitySchemes:
+  basic: !include exchange_modules/e6df9ba3-9c72-41fc-9ec5-724ba6cc6114/baiscauthentication/1.0.0/baiscauthentication.raml
+
+/expense/claims/summary:
+  securedBy:
+    - basic
+  displayName: Perform actions on expense claims details for an organization
+  description: Perform actions on expense claims details of all employees
+  type: 
+    lib.collection:
+      getType: lib.reportSummary
+      getResExample: !include examples/reportSummary/getRes.raml
+      postReqType: lib.reportSummary
+      postReqExample: !include examples/reportSummary/postReq.raml
+      patchReqType: lib.reportSummary
+      patchReqExample: !include examples/reportSummary/patchReq.raml
+      putReqType: lib.reportSummary
+      putReqExample: !include examples/reportSummary/putReq.raml
+  
+  get:
+    displayName: Retrieve expense report summary for an organization
+    description: Retrieve report summary of all employees
+    queryParameters:
+      approvalStatus:
+        enum:
+          - Approved
+          - Not-Approved
+          - In-Review
+        required: false
+      transactionDate:
+        type: date-only
+        required: false
+        example: 2022-02-21
+  post:
+    displayName: Add an expense report summary
+    description: Add a report summary
+  put:
+    displayName: Replace an expense report summary
+    description: Replace a report summary
+  patch:
+    displayName: Update an existing expense report summary
+    description: Update an existing report summary
+  
+  /{Id}:
+    securedBy:
+      - basic
+    displayName: Perform actions on expense claim summary for a specific report
+    description: Perform actions on expense claim summary as per report id
+    type: 
+      lib.collection:
+        getType: lib.reportSummary
+        getResExample: !include examples/reportSummary/getByIdRes.raml
+    get:
+      displayName: Retrieve expense details for a specific report
+      description: Retrieve expense details for a report id
+    delete:
+      
+/expense/claims/details:
+    securedBy:
+      - basic
+    displayName: Perform actions on expense claims report details for an organization
+    description: Perform actions on expense claims report details of all employees
+    type:
+     lib.collection:
+      getType: lib.reportDetails
+      getResExample: !include examples/reportDetail/getRes.raml
+      postReqType: lib.reportDetails
+      postReqExample: !include examples/reportDetail/postReq.raml
+      patchReqType: lib.reportDetails
+      patchReqExample: !include examples/reportDetail/patchReq.raml
+      putReqType: lib.reportDetails
+      putReqExample: !include examples/reportDetail/putReq.raml
+    
+    get:
+     displayName: Retrieve expense details for all the reports
+     description: Retrieve expense details for the report id's
+    post:
+     displayName: Add an expense report details
+     description: Add a report details
+    put:
+      displayName: Replace expense details for a specific report
+      description: Replace expense details for a report id
+    patch:
+      displayName: Update expense details for a specific report
+      description: Update expense details for a report id
+  
+    /{Id}:
+      securedBy:
+      - basic
+      displayName: Perform actions on expense claim details for a specific report
+      description: Perform actions on expense claim details as per report id
+      type: 
+        lib.collection:
+          getType: lib.reportDetails
+          getResExample: !include examples/reportDetail/getByIdRes.raml
+      get:
+        displayName: Retrieve expense details for a specific report
+        description: Retrieve expense details for a report id
+      delete:
+        displayName: Delete an expense report details for a specific report
+        description: Delete report details for a report id

@@ -1,0 +1,39 @@
+%dw 2.0
+
+type auto_470ff6c4_a9e5_49d3_ade2_9824124dc3cd_Output_Payload = {
+  reportTotal?: Number, 
+  employeeName?: String, 
+  ledgerName?: String, 
+  reportId?: String, 
+  reportName?: String, 
+  personalExpenses?: Number, 
+  approval?: {
+    statusName?: String, 
+    statusCode?: String, 
+    _?: Any
+  }, 
+  submitDate?: String, 
+  employeeBankAccount?: String, 
+  creationDate?: String, 
+  totalApprovedAmount?: Number, 
+  processingPaymentDate?: String, 
+  expensesList?: {
+    expenses: Array<{      purpose?: String,       expenseTypeName?: String,       orgUnit?: String,       spendCategory?: String,       reportEntryId?: String,       isPersonal?: String,       transactionDate?: String,       transactionCurrencyName?: String,       policyID?: String,       exchangeRate?: Number,       transactionAmount?: Number,       expenseTypeId?: String,       customer?: String,       _?: Any    }>, 
+    _?: Any
+  }, 
+  reportDate?: String, 
+  exchangeRate?: Number, 
+  totalClaimedAmount?: Number, 
+  reportOwnerEmployeeId?: String, 
+  company?: String, 
+  location?: {
+    locationName?: String, 
+    locationCountry?: String, 
+    locationSubdivision?: String, 
+    _?: Any
+  }, 
+  currencyCode?: String, 
+  paymentStatus?: String, 
+  _?: Any
+}
+

@@ -1,0 +1,27 @@
+%dw 2.0
+
+type auto_7a95e2f5_9e2f_4950_9c67_7a0e4158e972_Output_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {| correlationId?: String |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    offset?: Number, 
+    limit?: Number, 
+    page?: Number
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {| Id: String |}, 
+  version: String, 
+  localAddress: String
+|}
+

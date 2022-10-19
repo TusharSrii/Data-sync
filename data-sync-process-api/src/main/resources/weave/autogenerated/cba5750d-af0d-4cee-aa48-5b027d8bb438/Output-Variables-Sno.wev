@@ -1,0 +1,5 @@
+%dw 2.0
+
+type auto_cba5750d_af0d_4cee_aa48_5b027d8bb438_Output_Variables_Sno = {|  |} {"typeAlias": "Serializable",
+"typeId": "java.io.Serializable"}
+

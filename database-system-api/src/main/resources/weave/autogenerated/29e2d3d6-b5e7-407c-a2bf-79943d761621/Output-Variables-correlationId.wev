@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_29e2d3d6_b5e7_407c_a2bf_79943d761621_Output_Variables_correlationId = String | Null
+

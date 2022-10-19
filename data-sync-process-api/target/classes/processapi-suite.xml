@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="processapi-suite.xml" />
+	<munit:test name="processapiFlow-test1" doc:id="caa48664-2bed-4c63-92e8-5a14fd6f0ff8" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="ae6d73ba-00d5-4038-beaf-861067ccb8a7" >
+				<munit:payload value="#[readUrl('classpath://processapiFlowtest1\set-event_payload.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to processapiFlow" doc:id="72674087-00f0-446f-adab-44df08ba9be7" name="processapiFlowSummary"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="processapiFlow-test" doc:id="328b54c0-dca4-40b3-8d3e-83a6856cf6d8" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="2c0969ec-6414-4b40-b063-3160bd246b9f" >
+				<munit:payload value="#[readUrl('classpath://processapiFlowtest\set-event_payload1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to processapiFlow" doc:id="6fa53c93-8d85-4842-b655-93ed8fd72c84" name="processapiFlowSummary"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

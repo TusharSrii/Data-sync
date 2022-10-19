@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_abab380d_9235_46a2_bc29_a425c44264c0_Output_Variables_fetchedData = Array<Expense_detail__c>
+type Expense_detail__c = {| Id?: String {"typeId": "Id"} |} {"label": "Expense_detail",
+"typeId": "Expense_detail__c"}
+
+
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <flow name="apisero-sapmock-sys-api-main">
+        <http:listener config-ref="apisero-sapmock-sys-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[vars.errorDescription default payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="apisero-sapmock-sys-api-config" />
+		<error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="apisero-sapmock-sys-api-console">
+        <http:listener config-ref="apisero-sapmock-sys-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="apisero-sapmock-sys-api-config" />
+		<error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="put:\expense\report\details:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="put-report-details-flow" doc:id="4293bb34-fd43-47c5-a212-d32950849b7e" name="put-report-details-flow"/>
+    </flow>
+    <flow name="put:\expense\report\summary:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="put-report-summary-flow" doc:id="617a5c55-c86a-47c0-a45b-d94b386fde93" name="put-report-summary-flow"/>
+    </flow>
+    <flow name="delete:\expense\report\details\(Id):apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="delete-report-details-by-id-flow" doc:id="0a6c8410-7679-4b98-acaa-c5c7be396de2" name="delete-report-details-by-id-flow"/>
+    </flow>
+    <flow name="delete:\expense\report\summary\(Id):apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="delete-report-summary-by-id-flow" doc:id="76d35868-511a-42c0-b424-736a12739b5c" name="delete-report-summary-by-id-flow"/>
+    </flow>
+    <flow name="patch:\expense\report\details:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="patch-report-details-flow" doc:id="3e4319c6-0b40-443d-a3ef-9681604d2070" name="patch-report-details-flow"/>
+    </flow>
+    <flow name="patch:\expense\report\summary:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="patch-report-summary-flow" doc:id="964a6a8f-f786-43d6-9ee6-a637df653dc8" name="patch-report-summary-flow"/>
+    </flow>
+    <flow name="get:\expense\report\details:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="get-report-details-flow" doc:id="7e901c57-d29a-4156-8713-f2cf9a8f0dbb" name="get-report-details-flow"/>
+    </flow>
+    <flow name="get:\expense\report\details\(Id):apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="get-report-details-by-id-flow" doc:id="21723ae1-701a-47da-9e3a-470a4af5e42c" name="get-report-details-by-id-flow"/>
+    </flow>
+    <flow name="get:\expense\report\summary:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="get-report-summary-flow" doc:id="94328afb-5cb5-4842-bc95-64971fc2b05e" name="get-report-summary-flow"/>
+    </flow>
+    <flow name="get:\expense\report\summary\(Id):apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="get-report-summary-by-id-flow" doc:id="72467bc5-f6eb-4a9a-a662-b73eceabdf35" name="get-report-summary-by-id-flow"/>
+    </flow>
+    <flow name="post:\expense\report\details:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="post-report-details-flow" doc:id="d030942a-5a8a-4811-b7bb-d7692b18aa50" name="post-report-details-flow"/>
+    </flow>
+    <flow name="post:\expense\report\summary:application\json:apisero-sapmock-sys-api-config">
+		<flow-ref doc:name="post-report-summary-flow" doc:id="b44ff59e-fef3-4bcb-89aa-d92dd32a950d" name="post-report-summary-flow"/>
+    </flow>
+</mule>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fd7e9697-f250-4077-aa3b-18e05da24243" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="processapiFlowSummary" doc:id="cba5750d-af0d-4cee-aa48-5b027d8bb438" initialState="started">
+		<scheduler doc:name="Scheduler set for 20 S" doc:id="0ef200d6-0c6b-4ee4-9c1b-56ed02c30160" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="20" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="processApiStartFlow" doc:id="3f1c9ef2-2f91-4195-97a6-cc448b2b2b76" message="processApiStartFlow" category="splunk.logger"/>
+		<set-variable value="#[correlationId]" doc:name="correlationId" doc:id="d9d4182f-c871-4d32-ab46-917b026d9304" variableName="correlationId"/>
+		<os:retrieve doc:name="waterMark" doc:id="2d5e3f93-fe10-404c-8f89-f2df3acaf822" key="waterMark" objectStore="Object_store(summary)" target="waterMark">
+			<os:default-value ><![CDATA[#[((now() as DateTime {format: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"} >> "UTC"
+)) as DateTime {format: "yyyy-MM-dd'T'HH:mm:ss.SSSZX"}]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Log waterMark" doc:id="be5171b7-8d8d-4bd0-b2d3-69a5b7460149" message='#[vars.waterMark]' category="splunk.logger"/>
+		<http:request method="GET" doc:name="request the exisisting data from SAP" doc:id="9fefe838-a1c5-4308-b1aa-4a715f94a47f" config-ref="HTTP_DB_Request_configuration" path="/expense/report/summary" responseTimeout="1000000" sendCorrelationId="AUTO">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Username" : "user",
+	"Password" : "password"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+{ "transactionTime" : vars.waterMark  substringBefore "Z"++ "Z" }]]]></http:query-params>
+		</http:request>
+		<choice doc:name="if new record" doc:id="62ce5526-5fe0-4cbb-96ea-0c9f43266040" >
+			<when expression="#[sizeOf(payload) != 0]">
+				<foreach doc:name="For Each Record" doc:id="3d452fa6-b407-4213-96ba-28fd1671b95e">
+						<logger level="INFO" doc:name="Log reportID" doc:id="56850134-01ee-4b0d-96fe-6fe4d30ddecb" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"report ID" : payload.reportId ,&#10;	"correlation Id" : correlationId&#10;}]' category="splunk.logger"/>
+						<set-variable value="#[payload.transactionTime]" doc:name="currentTimestamp" doc:id="515b5dcf-0bbd-46b2-91b1-4fd723b4b37e" variableName="currentTimestamp" />
+					<ee:transform doc:name="DW Acc to SF Feilds" doc:id="ee820b9b-3aaa-40e3-ab76-200728865fe0">
+								<ee:message>
+							<ee:set-payload resource="dwl/mapToSfFields.dwl" />
+								
+</ee:message>
+							</ee:transform>
+					<set-variable value="#[payload.reportSummary.reportId]" doc:name="Report Id" doc:id="ab4a2fb3-ac01-4b5f-92d2-dcdbc2944987" variableName="reportId" />
+					<try doc:name="Try" doc:id="41b0e300-bd6e-4c0c-91ce-b005af5d7c45">
+						<http:request method="POST" doc:name="request to insert the expense into netSuite" doc:id="2f1a1fa5-a72a-41a2-b210-ab80e7f4157f" config-ref="HTTP_SF_Request_configuration" path="/expense/claims/summary" responseTimeout="1000000000">
+									<error-mapping sourceType="HTTP:CONNECTIVITY" targetType="APP:CONNECTIVITY" />
+									<error-mapping sourceType="HTTP:TIMEOUT" targetType="APP:TIMEOUT" />
+									<error-mapping sourceType="HTTP:BAD_REQUEST" targetType="APP:BAD_REQUEST" />
+									<error-mapping sourceType="HTTP:BAD_GATEWAY" targetType="APP:BAD_GATEWAY" />
+									<error-mapping sourceType="HTTP:NOT_FOUND" targetType="APP:NOT_FOUND" />
+									<error-mapping targetType="APP:ANY" />
+
+
+		</http:request>
+						<error-handler>
+							<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c6db0cbd-07ce-4b64-8e00-2a28a9cb8daf" type="ANY" >
+								<set-variable value="#[error.description]" doc:name="Error Message" doc:id="33623f03-e962-43d4-b14c-8704afe3595f" variableName="error"/>
+								<ee:transform doc:name="accumulateError" doc:id="b34d82c5-83af-49fb-8fe7-3f87a9ad271f" >
+									<ee:message >
+										<ee:set-payload resource="dwl/accumulateError.dwl" />
+									</ee:message>
+								</ee:transform>
+								<flow-ref doc:name="accumulate-error-os" doc:id="2d75e81f-6213-4afe-b16e-2e9c3f8c8732" name="accumulate-error-os" />
+							</on-error-continue>
+					</error-handler>
+				</try>
+					<os:store doc:name="Store waterMark" doc:id="28a1deed-989e-48af-87d1-44279b0eed74" key="waterMark" failOnNullValue="false" objectStore="Object_store(summary)">
+						<os:value ><![CDATA[#[vars.currentTimestamp ++ "Z"]]]></os:value>
+
+		</os:store>
+					<logger level="INFO" doc:name="Log operation " doc:id="752848ad-361c-4b67-9fec-fc8de35759e2" message="Inseting into Netsuite" category="splunk.logger"/>
+					</foreach>
+			
+</when>
+			<otherwise>
+				<logger level="INFO" doc:name="No new record were found" doc:id="9cc49c88-d25d-46df-8747-43e9153a78c2" message='#["No new record were found at " ++ now() as String { format: "uuuu/MM/dd" }]' category="splunk.logger"/>
+				<os:store doc:name="Store waterMark" doc:id="e310888a-357c-425b-84a9-89433f89a866" key="waterMark" objectStore="Object_store(summary)">
+					<os:value ><![CDATA[#[vars.waterMark]]]></os:value>
+				</os:store>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="processApiEndFlow" doc:id="f05606b0-a1ba-4974-adf7-6b6464317992" message="processApiEndFlow" category="splunk.logger"/>
+	</flow>
+	<sub-flow name="accumulate-error-os" doc:id="40e50305-ebe3-4964-9128-998ac67033d2" >
+		<try doc:name="Try" doc:id="258db2c3-5579-451b-a10d-c77be63adb2a" >
+			<os:retrieve doc:name="Retrieve" doc:id="96e3799f-58e3-4dc7-a247-9384086ea6af" key="error" objectStore="Object_store(error)" target="error">
+			<os:default-value><![CDATA[#[[] as Array]]]></os:default-value>
+		</os:retrieve>
+			<os:store doc:name="Store" doc:id="2a907570-5a47-4f84-bb60-df4333051ecf" key="error" objectStore="Object_store(error)">
+			<os:value><![CDATA[#[%dw 2.0
+output application/json
+---
+vars.error << payload]]]></os:value>
+		</os:store>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9c3edf10-9a14-4612-b7e3-9cbd0ff98103" >
+					<logger level="ERROR" doc:name="Logger" doc:id="6fd23fb5-0e6d-4382-b49f-43be6b02ff89" message="Unable to store data in Object Store" category="splunk.logger"/>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+	<flow name="notify-errors" doc:id="f00f2ab2-acff-4adb-8b54-65fe75eb9967" initialState="started" >
+		<scheduler doc:name="Scheduler" doc:id="6ef0c662-39a1-416e-a0a0-7cf11bbd5c3a" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Log notification " doc:id="86d70329-712b-4732-9e5d-3c563666e4fc" message="sending notification" category="splunk.logger"/>
+		<os:retrieve doc:name="Retrieve" doc:id="199cd822-d4e1-4401-a691-b40ae935780f" key="error" target="error" objectStore="Object_store(error)">
+			<os:default-value><![CDATA[#[[] as Array]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="063c940f-59b2-4793-a689-e8bb42d872cd" message="#[vars.error]" category="splunk.logger"/>
+		<choice doc:name="Choice" doc:id="1d32853d-7b05-4b84-a6da-a85534dceb15" >
+			<when expression="#[sizeOf(vars.error) &gt; 0]" >
+				<ee:transform doc:name="payload" doc:id="eaa791be-f88a-44df-aa6f-f76d9a75ff3f">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.error]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="objectType"><![CDATA[%dw 2.0
+output application/json
+---
+payload pluck ($$)]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				<set-variable value='#["ErrorReport_" ++ (now() as String {format: "yyyyMMddHHmmssSSS"}) ++ ".txt"]' doc:name="Attachment fileName" doc:id="051d45a4-fba4-4253-ba88-de1fd8bb939d" variableName="errorReport" />
+				<email:send doc:name="Send Error Report via Email" doc:id="35374f07-0532-4ece-a316-4691cb3a2fa8" config-ref="Email_SMTP" fromAddress="${mail.from}" subject="Error Report">
+						<email:to-addresses>
+							<email:to-address value="${mail.to}" />
+						</email:to-addresses>
+						<email:body>
+							<email:content><![CDATA[#[%dw 2.0
+output text/plain
+---
+"Failed Records logs are added in attachments please refer same."]]]></email:content>
+						</email:body>
+						<email:attachments><![CDATA[#[{
+	"error.txt" : payload
+}]]]></email:attachments>
+					</email:send>
+				<os:clear doc:name="Clear" doc:id="c1c17b09-b944-413b-8c85-8ff510a46547" objectStore="Object_store(error)" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="b3f9398d-cc7a-4e01-ba87-d5fd16618d7c" message="All Records are successfully processed." category="splunk.logger"/>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f339a7c9-bbd7-44a0-9552-db43d194b946" >
+				<logger level="ERROR" doc:name="Logger" doc:id="47a13168-4709-4dcf-89aa-d9f2de4271ac" message="Unable to notify error" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>	
+</mule>

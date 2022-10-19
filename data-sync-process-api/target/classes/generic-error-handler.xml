@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+
+	<error-handler name="global_error_handler">
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="4664c08b-2e6e-42ef-b303-34eb32a269dd"
+			type="HTTP:CONNECTIVITY">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="b70fda97-5d23-43b4-a583-bef0dc76f48b"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler" doc:id="46605ace-1ccd-4f22-a388-89e351160554" 
+				message='#["From parent flow" ++ (vars.apiLayer default "")]'/> <logger level="INFO" 
+				doc:name="Entering Generic Error Handler" doc:id="cb74347c-9ae7-4087-aa5b-0fcdc092891b" 
+				message="From Properties file #[p('globalErrorHandler.api-layer')]"/> -->
+			<set-variable
+				value='${errorCodeMessage.http.connectivity.code}'
+				doc:name="httpStatus" doc:id="ce3a3bdb-f2b3-488a-8f09-418b29806660"
+				variableName="httpStatus" />
+			<set-variable
+				value="#[if(p('globalErrorHandler.api-layer') == &quot;experience&quot; or p('globalErrorHandler.api-layer') == &quot;exp&quot;)
+p('errorCodeMessage.http.connectivity.description') default &quot;&quot;
+ else
+ error.description default &quot;&quot;]"
+				doc:name="errorDescription"
+				doc:id="21575b8b-5519-4c88-9ef6-51718f4110f3"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="db721e90-6ebd-4b0b-a6d5-d6bc410c73df" name="sendEmailSub_Flow"/>
+
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="e4a9727a-20a1-40a9-84ff-2a3404798abf" type="HTTP:FORBIDDEN">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="f3e79d5f-2826-40a4-9db8-9f805d0dde4c"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='${errorCodeMessage.http.forbidden.code}'
+				doc:name="httpStatus" doc:id="5d1dafcc-8a3e-4f21-811f-c17c2959e5b4"
+				variableName="httpStatus" />
+			<set-variable
+				value="#[if(p('globalErrorHandler.api-layer') == &quot;experience&quot; or p('globalErrorHandler.api-layer') == &quot;exp&quot;)
+p('errorCodeMessage.http.forbidden.description') default &quot;&quot;
+ else
+ error.description default &quot;&quot;]"
+				doc:name="errorDescription"
+				doc:id="17e98af3-a048-4b5e-abff-6c25774038ef"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="5faebdfd-b362-44a0-947f-f8e4856c35fd" name="sendEmailSub_Flow"/>
+
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="cbd5a087-acbe-41bd-82b3-47c91938d2ca"
+			type="HTTP:SERVICE_UNAVAILABLE">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="7371db01-ff9a-44f8-82c8-99c8c2b50ddd"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='${errorCodeMessage.http.serviceUnavailable.code}'
+				doc:name="httpStatus" doc:id="80e0b97e-5da2-4024-94df-612411d8f312"
+				variableName="httpStatus" />
+			<set-variable
+				value="#[if(p('globalErrorHandler.api-layer') == &quot;experience&quot; or p('globalErrorHandler.api-layer') == &quot;exp&quot;)
+p('errorCodeMessage.http.serviceUnavailable.description') default &quot;&quot;
+ else
+ error.description default &quot;&quot;]"
+				doc:name="errorDescription"
+				doc:id="acfb6f88-bbf8-4392-ad54-f4aff1a8df30"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="cfce11bc-345c-4edd-8172-8060d3c2ca45" name="sendEmailSub_Flow"/>
+
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="e34e613c-6d3b-4190-9682-783047c926db" type="HTTP:TIMEOUT">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="f3a8aaff-7194-47cd-be8b-74fe52bbdc81"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='${errorCodeMessage.http.timeout.code}' doc:name="httpStatus"
+				doc:id="299be3c6-e326-464e-827c-ac4dacf1e462"
+				variableName="httpStatus" />
+			<set-variable
+				value="#[if(p('globalErrorHandler.api-layer') == &quot;experience&quot; or p('globalErrorHandler.api-layer') == &quot;exp&quot;)
+p('errorCodeMessage.http.timeout.description') default &quot;&quot;
+ else
+ error.description default &quot;&quot;]"
+				doc:name="errorDescription"
+				doc:id="4e828aab-f05d-4345-84bc-f84bb217db29"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="ffd2be1a-2424-40b0-9c75-bae009e5d71a" name="sendEmailSub_Flow"/>
+
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="d0ce0c85-d06f-499a-a471-12d074eac8b1"
+			type="HTTP:UNAUTHORIZED">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="2cd7254e-eb86-4032-a47c-dcba5d99fafe"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='${errorCodeMessage.http.unauthorized.code}'
+				doc:name="httpStatus" doc:id="22c33d88-510e-4b54-b59d-6e896d6d21af"
+				variableName="httpStatus" />
+			<set-variable
+				value="#[if(p('globalErrorHandler.api-layer') == &quot;experience&quot; or p('globalErrorHandler.api-layer') == &quot;exp&quot;)
+p('errorCodeMessage.http.unauthorized.description') default &quot;&quot;
+ else
+ error.description default &quot;&quot;]"
+				doc:name="errorDescription"
+				doc:id="adc8bca4-278f-4de9-9728-c51b75279e01"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="3ad49df8-6fdf-492f-b23e-a64fb9d1a37e" name="sendEmailSub_Flow"/>
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="985372c1-1f07-4db5-b636-8dd89423218c" type="EXPRESSION">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="5ea16be7-dbe3-4639-be04-c85f63e5bc02"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='#[attributes.statusCode default "500"]' doc:name="httpStatus"
+				doc:id="137c69f3-df60-4cdf-a9f1-8bdcfa63867b"
+				variableName="httpStatus" />
+			<set-variable value="#[error.description]"
+				doc:name="errorDescription"
+				doc:id="eca855da-09f2-45ca-878e-b239e54dcc3b"
+				variableName="errorDescription" />
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="73d40ee8-fc30-42e5-956b-d870b1a7016a" name="sendEmailSub_Flow"/>
+		
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="b431f6d1-433d-46b1-88eb-44b110384be9" type="ANY">
+			<!-- <logger level="INFO" doc:name="Entering Generic Error Handler"
+				doc:id="9e16266b-ae00-4909-b08b-0b283f0d46d0"
+				message='"In apisero-generic-global-error-handler, CorrelationID :  #[correlationId]"' /> -->
+			<set-variable
+				value='#[attributes.statusCode default "500"]' doc:name="httpStatus"
+				doc:id="6143fbc8-5a90-4f49-b337-857ff17343db"
+				variableName="httpStatus" />
+			<set-variable value="#[error.description]"
+				doc:name="errorDescription"
+				doc:id="1209573c-d702-4d2d-81e5-ee457d8d2f11"
+				variableName="errorDescription" />
+			<ee:transform doc:name="Error Message" doc:id="7850780f-3862-45e9-bf40-f6e49a37842d" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+          'statusCode': vars.httpStatus,
+          'message': vars.errorDescription 
+ }]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="sendEmailSub_Flow" doc:id="eab74851-dc2e-4f4b-a95b-93a1d6fcdd84" name="sendEmailSub_Flow"/>
+		
+</on-error-propagate>		
+	                                                                         
+</error-handler>
+	<sub-flow name="sendEmailSub_Flow" doc:id="6b2080ba-99f4-42ad-bda8-8de3928382f6" >
+		<email:send doc:name="Send Error Mail" doc:id="e7c41ba4-f662-44ed-8313-6d9ac168407b" config-ref="Email_SMTP" fromAddress="${mail.from}" subject="Error Occured in Processing Records" >
+			<email:to-addresses >
+				<email:to-address value="${mail.to}" />
+			</email:to-addresses>
+			<email:body >
+				<email:content ><![CDATA[#[%dw 2.0
+output text/plain
+---
+"Failure logs are added in attachments please refer same."]]]></email:content>
+			</email:body>
+			<email:attachments ><![CDATA[#[%dw 2.0
+output text/plain
+---
+"error.txt" : payload]]]></email:attachments>
+		</email:send>
+	</sub-flow>
+
+</mule>

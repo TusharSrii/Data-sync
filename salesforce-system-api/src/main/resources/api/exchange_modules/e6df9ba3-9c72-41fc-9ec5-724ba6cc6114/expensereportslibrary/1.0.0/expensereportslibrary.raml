@@ -1,0 +1,195 @@
+#%RAML 1.0 Library
+
+types:
+  approval:
+    properties:
+      statusCode?: string
+      statusName?: string
+  
+  expense:
+    properties:
+      reportEntryId?: string
+      expenseTypeId?: string
+      expenseTypeName?: string
+      spendCategory?: string
+      purpose?: string
+      transactionDate?: date-only
+      transactionCurrencyName?: string
+      exchangeRate?: number
+      transactionAmount?: number
+      customer?: string
+      isPersonal?: string
+      orgUnit?: string
+      policyID?: string
+  
+  expensesList:
+    properties:
+      expenses:
+        type: expense[]
+
+  location:
+    properties:
+      locationName?: string
+      locationSubdivision?: string
+      locationCountry?: string
+
+  reportDetails:
+    properties:
+      employeeName?: string
+      reportId?: string
+      reportName?: string
+      reportDate?: date-only
+      creationDate?: date-only
+      submitDate?: date-only
+      currencyCode?: string
+      exchangeRate?: number
+      reportTotal?: number
+      personalExpenses?: number
+      totalClaimedAmount?: number
+      totalApprovedAmount?: number
+      employeeBankAccount?: string
+      processingPaymentDate?: date-only
+      company?: string
+      ledgerName?: string
+      approval?: {type: approval}
+      paymentStatus?: string
+      expensesList?: {type: expensesList}
+      location?: {type: location}
+      reportOwnerEmployeeId?: string
+ 
+  reportSummary:
+    properties:
+      reportName?: string
+      reportId?: string
+      reportTotal?: number
+      reportCurrency?: string
+      reportDate?: date-only
+      lastComment?: string
+      expenseUserLoginID?: string
+      approverLoginID?: string
+      employeeName?: string
+      approvalStatus?: string
+      paymentStatus?: string
+      ledgerName?: string
+
+  error:
+    properties:
+      errorCode?: string
+      errorMessage?: string
+
+traits:
+  errorResponse:
+    responses:
+      400:
+        body:
+          application/json:
+            type: error
+            example:
+              {
+                "errorCode":"400",
+                "errorMessage": "Bad Request"
+              }
+      404:
+        body:
+          application/json:
+            type: error
+            example:
+              {
+                "errorCode":"404",
+                "errorMessage": "Resource Not Found"
+              }
+      500:
+        body:
+          application/json:
+            type: error
+            example:
+              {
+                "errorCode":"500",
+                "errorMessage": "Internal Server Error"
+              }
+  header:
+    headers:
+      correlationId:
+        type: string
+        pattern: "[a-zA-Z0-9]{7}"
+        required: false
+
+  paginated:
+    queryParameters: 
+      offset?: 
+        type: integer
+        default: 10
+        minimum: 0
+        description: The `offset` parameter specifies the first entry to return from a collection.
+      limit?: 
+        type: integer
+        default: 50
+        minimum: 1
+        description: The `limit` parameter restricts the number of entries returned.
+      page?:
+        type: integer
+        default: 1
+        minimum: 1
+        description: The `page` parameter specifies the page of results to return.
+
+resourceTypes:
+  collection:
+    get?:
+      is: [errorResponse,header,paginated]
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<getType>>
+              example: <<getResExample>>
+    post?:
+      is: [errorResponse,header]
+      body:
+        application/json:
+          type: <<postReqType>>
+          example: <<postReqExample>>
+      responses:
+        201:
+          body:
+            application/json:
+              example: |
+                {
+                  "correlationId": "DELR12",
+                  "reportId" : "12B"
+                }
+    
+    delete?:
+      is: [errorResponse,header]
+      responses:
+        202:
+          body:
+            application/json:
+              example: |
+                {
+                  "correlationId": "DELR12",
+                  "reportId" : "12B"
+                }
+    patch?:
+      is: [errorResponse,header]
+      body:
+        application/json:
+          type: <<patchReqType>>
+          example: <<patchReqExample>>
+      responses:
+        204:
+    
+    put?:
+      is: [errorResponse,header]
+      body:
+        application/json:
+          type: <<putReqType>>
+          example: <<putReqExample>>
+      responses:
+        201:
+          body:
+            application/json:
+              example: |
+                {
+                  "correlationId": "DELR12",
+                  "reportId" : "12B"
+                }

@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="interface-suite.xml" />
+	<munit:test name="get:\expense\claims\summary_Success" doc:id="651df31e-a54e-4d77-9324-bb21e46758ea" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="31742bf8-2c32-4164-97bd-ea6d6159e269" >
+				<munit:payload value="#[readUrl('classpath://getexpenseclaimssummarySuccess\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getexpenseclaimssummarySuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getexpenseclaimssummarySuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\expense\claims\summary:apisero-netsuitemock-sys-api-config" doc:id="2d0fdc2f-c448-4b10-b885-87f44d8bc1a9" name="get:\expense\claims\summary:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="a83f00d2-3f45-419e-b1cd-dd68e941c19b" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getexpenseclaimssummarySuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\expense\claims\summary\(Id)_Success" doc:id="664fa6d1-f288-437f-92e0-b3c5bce43c74" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="daa3b0a9-2e91-47f2-906d-b3cbb329da07" >
+				<munit:payload value="#[readUrl('classpath://getexpenseclaimssummaryIdSuccess\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getexpenseclaimssummaryIdSuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getexpenseclaimssummaryIdSuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config" doc:id="1344fe69-68dc-4934-9d5a-8e27d04042d8" name="get:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="e92ad5bb-16b4-4f6d-9cba-0d22bf5d2c23" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getexpenseclaimssummaryIdSuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\expense\claims\details_Success" doc:id="29bf2d97-1ae6-4158-9f93-488acf2ecaf1" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="e8f7236d-79ff-45c9-a3f4-b9afc00d24cb" >
+				<munit:payload value="#[readUrl('classpath://getexpenseclaimsdetailsSuccess\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getexpenseclaimsdetailsSuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getexpenseclaimsdetailsSuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\expense\claims\details:apisero-netsuitemock-sys-api-config" doc:id="64015e1f-08a8-4d4b-9e97-56790226009e" name="get:\expense\claims\details:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="1be33d2a-86d9-4ff8-98bd-6fa85ac5d245" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getexpenseclaimsdetailsSuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\expense\claims\details\(Id)_Success" doc:id="9823b4fd-fc60-42ed-a158-daadbf9060e8" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="27856b74-dccb-4c2a-ab09-e6624e431f2d" >
+				<munit:payload value="#[readUrl('classpath://getexpenseclaimsdetailsIdSuccess\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getexpenseclaimsdetailsIdSuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getexpenseclaimsdetailsIdSuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config" doc:id="6e19b47d-e8af-495e-9baf-5b098221c075" name="get:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="12744b55-442d-4402-910d-77e619af485d" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getexpenseclaimsdetailsIdSuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\expense\claims\summary_TC01" doc:id="071de34b-cc5f-4efe-b8fb-3458f3f9ce44" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="7857bb86-6480-4c93-85dc-38a476f2cf42" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postexpenseclaimssummaryTC01\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postexpenseclaimssummaryTC01\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postexpenseclaimssummaryTC01\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config" doc:id="015be7d4-63da-4398-bcf7-2add9fc3e4c1" name="post:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c245ec1e-856d-480c-83f0-d713c0530792" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postexpenseclaimssummaryTC01::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\expense\claims\summary_TC02" doc:id="18b1d81c-1a00-4bf3-b6cc-ffcf94228e59" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="226ff65a-b778-4ed0-9c96-4644f301180b" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postexpenseclaimssummaryTC02\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postexpenseclaimssummaryTC02\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postexpenseclaimssummaryTC02\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config" doc:id="eba79915-347d-44a4-9e82-0a1f8b87ade3" name="post:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c9d8d0df-aae7-47e6-926d-4c582f696a01" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postexpenseclaimssummaryTC02::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\expense\claims\details_TC01" doc:id="a7b7693c-d341-49e2-8e15-71243faf9613" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="4e06d380-a1e1-4889-96c7-a795d79c9dc2" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postexpenseclaimsdetailsTC01\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postexpenseclaimsdetailsTC01\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postexpenseclaimsdetailsTC01\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config" doc:id="e708427a-f631-41dc-916c-0b93a5250094" name="post:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="ef97e712-4784-4280-8189-7fed152e632a" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postexpenseclaimsdetailsTC01::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\expense\claims\details_TC02" doc:id="5eb90fd1-7f42-4eee-8a69-02b599706591" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="9c818160-dc48-43b7-b5ab-3bfc0525ed9f" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postexpenseclaimsdetailsTC02\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postexpenseclaimsdetailsTC02\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postexpenseclaimsdetailsTC02\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config" doc:id="b21d71f6-deb2-4615-977b-a2cf741c52f9" name="post:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="14aca99b-e582-464c-b58d-349dae35aca4" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postexpenseclaimsdetailsTC02::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="patch:\expense\claims\details_Success" doc:id="7623046d-65da-4dae-9846-5a5763b2b070" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="88352572-577a-4972-9781-0fd31fb315db" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://patchexpenseclaimsdetailsSuccess\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://patchexpenseclaimsdetailsSuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://patchexpenseclaimsdetailsSuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to patch:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config" doc:id="6c6a68f6-ad40-4de1-9f77-8a98f6392b89" name="patch:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="7229b027-ef9e-4d50-b08c-8313eb9bd957" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import patchexpenseclaimsdetailsSuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="patch:\expense\claims\summary_Success" doc:id="4cb8cf99-931a-4b39-a14e-97d263bc830d" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="803007b3-d6c2-4f07-95a3-b642e1246edb" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://patchexpenseclaimssummarySuccess\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://patchexpenseclaimssummarySuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://patchexpenseclaimssummarySuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to patch:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config" doc:id="2a4be8df-d62a-451c-8ad8-83827f7c45f6" name="patch:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="99fbd9f0-11cd-418e-8931-bac19bcc10ae" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import patchexpenseclaimssummarySuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="put:\expense\claims\details_Success" doc:id="d2475d3b-599f-4bc7-894c-ee8a5d786f32" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="2853b19f-5ba4-4d89-ace4-af8e73362c42" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://putexpenseclaimsdetailsSuccess\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://putexpenseclaimsdetailsSuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putexpenseclaimsdetailsSuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config" doc:id="68132b04-8b9c-42a2-ade5-12ccc5ea2b15" name="put:\expense\claims\details:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="f67cd322-74b2-420e-bc13-d2fb2734c606" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putexpenseclaimsdetailsSuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="put:\expense\claims\summary_Success" doc:id="6719b172-2a94-45e8-acbb-a84c98d7cd33" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="6d2ee3e1-6c2d-4946-9005-174eb7837986" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://putexpenseclaimssummarySuccess\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://putexpenseclaimssummarySuccess\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putexpenseclaimssummarySuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config" doc:id="579e7963-6c2f-4557-a2bf-e560940a428e" name="put:\expense\claims\summary:application\json:apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="ac9bc37a-160f-4fd3-8e5b-c69df85bafc3" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putexpenseclaimssummarySuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete:\expense\claims\details\(Id)_TC01" doc:id="3c27e48f-75a6-4e3a-9c96-d40dde5fd5c1" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="1b162483-202d-482d-947c-61dcfedc7ed9" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://deleteexpenseclaimsdetailsIdTC01\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://deleteexpenseclaimsdetailsIdTC01\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deleteexpenseclaimsdetailsIdTC01\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config" doc:id="0d7ab5a5-91de-4fde-8eaa-1b57a6f2fb40" name="delete:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="b624f97c-be9e-45ed-8d85-4a9313e0eb83" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deleteexpenseclaimsdetailsIdTC01::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete:\expense\claims\details\(Id)_TC02" doc:id="958f69da-38c7-4b68-adf7-a3a0ad1807dc" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="dcdc968b-c52b-4063-9808-36f8c5f3bcec" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://deleteexpenseclaimsdetailsIdTC02\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://deleteexpenseclaimsdetailsIdTC02\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deleteexpenseclaimsdetailsIdTC02\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config" doc:id="4196a8c4-6362-4299-9d79-e836cb14dc48" name="delete:\expense\claims\details\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="29d0fe3e-6385-4a6a-8acd-b50f0ef55237" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deleteexpenseclaimsdetailsIdTC02::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete:\expense\claims\summary\(Id)_TC01" doc:id="454a7820-15d4-404c-9187-60916ab7e6d3" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="24da6a41-3c14-4ca2-aedf-87bf6f8e5f0a" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://deleteexpenseclaimssummaryIdTC01\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://deleteexpenseclaimssummaryIdTC01\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deleteexpenseclaimssummaryIdTC01\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config" doc:id="3ad6f1bd-05c1-4065-b624-9df3f71de9c7" name="delete:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="3e90dcd8-f9e0-4e42-93b9-3aac595d3c66" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deleteexpenseclaimssummaryIdTC01::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete:\expense\claims\summary\(Id)_TC02" doc:id="79e0e9b5-6f3e-48ae-ba80-488dc9384e52" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="154e628d-8167-4d07-ad01-1dab7ecb35ed" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://deleteexpenseclaimssummaryIdTC02\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://deleteexpenseclaimssummaryIdTC02\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deleteexpenseclaimssummaryIdTC02\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config" doc:id="1f568233-f9ca-4029-b709-db46c59cc59b" name="delete:\expense\claims\summary\(Id):apisero-netsuitemock-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="b49969d8-7a2a-460d-a535-23e1b5f0e64a" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deleteexpenseclaimssummaryIdTC02::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="APIKIT:BAD_REQUEST" doc:id="af5985a5-eb67-440b-af23-79e359ea962d" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIKIT:BAD_REQUEST" doc:id="2e3b6195-1a66-4a67-a2fe-ea205440b873" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="cb53470c-2cef-464c-b71a-bc317d4b8092" name="apisero-netsuitemock-sys-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="e9278983-0194-4fd1-8ff1-773c0a5a8ef8" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1a20eacd-6d25-45cb-8c1e-e2b070c535df" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="APIKIT:NOT_FOUND" doc:id="604ff88b-7670-430c-bc08-472c52cb305a" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock APIKIT:NOT_FOUND" doc:id="a2a1cae8-de9d-448a-9a9e-d14b3ccc0d28" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="70644eaf-ac76-4a0a-800f-233e93fc7cde" name="apisero-netsuitemock-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="4e4e71b0-dc4c-4f0d-8deb-60b0a5c4957c" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="66084322-d563-41d3-90d7-d01d2bc7d042" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="APIKIT:METHOD_NOT_ALLOWED" doc:id="726f8f94-f6ef-42bf-8cb4-4e51d0dbc2cc" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock APIKIT:METHOD_NOT_ALLOWED" doc:id="f0d24afd-9fe2-440d-914f-44802523a887" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="8cfe881d-f461-46ae-99f7-cc2b08445eac" name="apisero-netsuitemock-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="0df16475-4684-4a5e-91b4-d0e9f9969afb" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="306125d2-ae2a-4102-ba76-ac2eeaa42ec9" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="APIKIT:NOT_ACCEPTABLE" doc:id="2325977a-8cb0-4dfa-bf61-877cc847ffe6" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock APIKIT:NOT_ACCEPTABLE" doc:id="7d718afe-f87e-4db8-a776-53d1466bc6a9" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="66fd7d41-06ee-492b-a748-1de07bcd1e0f" name="apisero-netsuitemock-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="adf67fde-5a63-40e1-a2fa-3ffa63a2093a" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4e453d23-b121-4411-9764-11203ff74c05" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="395e4043-beb2-482d-9660-c1dd63083b62" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="12c069f2-2e5c-4339-816e-2cc05b7e3690" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="cbfea5db-86f1-4f86-9266-a4a7713696ac" name="apisero-netsuitemock-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="c6fccb44-4cda-46e8-a7ee-e6d7cbba36e6" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="596f6e5c-edbd-4b3b-af32-4e11d8de4770" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="APIKIT:NOT_IMPLEMENTED" doc:id="e80ee7cd-ddc4-4038-808e-e2623b87b83d" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock APIKIT:NOT_IMPLEMENTED" doc:id="7f476d48-0fe3-4132-83b0-a83b40b25051" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="apisero-netsuitemock-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to apisero-netsuitemock-sys-api-main" doc:id="84983e2e-24e2-412f-b5da-ce7ed44beb5c" name="apisero-netsuitemock-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="6999652a-80dd-4385-a05b-57b6c8dd883d" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c379eadc-54a4-4fb6-8ec7-5873107d4ba0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="SALESFORCE:CONNECTIVITY" doc:id="881c1a86-81a7-48ba-bc60-8a358b5fe4a5" description="Test" expectedErrorType="SALESFORCE:CONNECTIVITY">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock SALESFORCE:CONNECTIVITY" doc:id="d6c09d65-f9b9-433e-82d7-39159da95b5a" processor="salesforce:query">
+					<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bab55370-b015-49d1-8145-5c20461dce95" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to getReportSummaryflow" doc:id="9de04ad4-dc12-46b1-8c0f-8954dc50cf56" name="getReportSummaryflow" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="5721b7c6-8c30-461b-8900-43e8ece49858" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c97f6146-6248-46ed-ac50-6f6709db9a69" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="SALESFORCE:TIMEOUT" doc:id="4c045cbe-fff1-426c-81a1-2f1ce2239685" description="Test" expectedErrorType="SALESFORCE:TIMEOUT">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock SALESFORCE:TIMEOUT" doc:id="1fcdd8af-bbfa-494a-a55e-966c09265be4" processor="salesforce:query">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="bab55370-b015-49d1-8145-5c20461dce95" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:TIMEOUT" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to getReportSummaryflow" doc:id="519c3656-5d38-4ffb-98f9-2f68139b2ca9" name="getReportSummaryflow" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="377678de-6279-4b2e-bbf5-a55b4846715a" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b136e7cd-fdba-472b-b652-2a2e4c1d3132" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="SALESFORCE:NOT_FOUND" doc:id="e8778ead-aef9-4d09-be95-dd419a91a952" description="Test" expectedErrorType="SALESFORCE:NOT_FOUND">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock SALESFORCE:NOT_FOUND" doc:id="1708c0d9-f191-4e33-a200-110588129946" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bab55370-b015-49d1-8145-5c20461dce95" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:NOT_FOUND" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to getReportSummaryflow" doc:id="e1648a69-7149-495a-9e19-2c6ccd715237" name="getReportSummaryflow" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="806beaf2-4a8d-43cd-83b5-a3a962ce9c01" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="afd24bd8-79e6-49a1-87fa-b886f130070c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="SALESFORCE:LIMIT_EXCEEDED" doc:id="95a24bb6-2c40-4848-b36f-07525ca51afb" description="Test" expectedErrorType="SALESFORCE:LIMIT_EXCEEDED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock SALESFORCE:LIMIT_EXCEEDED" doc:id="d1cdcd52-5cfd-4cc7-9780-bba400590c94" processor="salesforce:query">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="bab55370-b015-49d1-8145-5c20461dce95" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:LIMIT_EXCEEDED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to getReportSummaryflow" doc:id="5a26b2c0-c6d8-4659-ba79-c066b4b035e0" name="getReportSummaryflow" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="fd7fd2d1-1f4e-4705-9fb7-3fe298d6b3eb" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0cf7e88e-bb3f-4c3c-814d-1f7c7636e6a0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+		<munit:test name="SALESFORCE:INVALID_INPUT" doc:id="23e8fd3f-0bdb-4935-8866-a5a1f6ba8a06" description="Test" expectedErrorType="SALESFORCE:INVALID_INPUT">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock SALESFORCE:INVALID_INPUT" doc:id="fcfb6436-235e-4e37-ab65-fc64d7ff5717" processor="salesforce:query">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="bab55370-b015-49d1-8145-5c20461dce95" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:INVALID_INPUT" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to getReportSummaryflow" doc:id="79c4317c-d4df-46d1-bf0a-1ba8138fc368" name="getReportSummaryflow" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="c82b479c-4fb0-4fe0-b357-1d36352076e7" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d44b853c-5f39-4759-b44a-51b4f03c2e6c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+
+
+</mule>
